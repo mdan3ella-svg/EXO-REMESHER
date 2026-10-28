@@ -1,4 +1,6 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><title>EXO | Skeletal | Surface | Remesher</title>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><title>EXO | Surface Retopology | Vertascan</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,300..800&display=swap" rel="stylesheet">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 26 26%27%3E%3Crect width=%2726%27 height=%2726%27 rx=%274%27 fill=%27%232f3439%27/%3E%3Cpath d=%27M4 4h18v18H4zM13 4v18M4 13h18%27 fill=%27none%27 stroke=%27%23d6ff4d%27 stroke-width=%271.8%27/%3E%3C/svg%3E">
 <style>
 :root{color-scheme:dark;--bg:#2f3439;--pn:#3b4147;--ln:#5a646c;--tx:#bff03c;--mu:#93b04a;--ac:#d6ff4d;--wr:#ffd24a;--er:#ff8a7a;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 *{box-sizing:border-box}html,body{margin:0;height:100%;background:var(--bg);color:var(--tx);font:12px/1.4 ui-monospace,Menlo,Consolas,monospace}
@@ -22,11 +24,205 @@ table{border-collapse:collapse;width:100%}td{padding:1px 4px;border-bottom:1px s
 @media(max-width:820px){#app{display:block;height:auto}#vp{height:55vh}footer{display:block;height:auto}}
 #tb{position:absolute;left:8px;top:8px;right:8px;display:flex;gap:4px;flex-wrap:wrap;align-items:center;background:#3b4147ee;border:1px solid var(--ln);border-radius:6px;padding:4px;z-index:5}#tb .sp{width:1px;height:18px;background:var(--ln);margin:0 2px}#tb button{min-width:28px;padding:3px 6px}
 #stp{display:none;flex-basis:100%;gap:4px;align-items:center;flex-wrap:wrap;padding-top:4px;border-top:1px solid var(--ln)}#app[data-th=workflow] #stp{display:flex}#stp button.on{background:var(--ac);color:#252d14;border-color:var(--ac);font-weight:bold}#stp .hint{color:var(--mu);margin-left:6px}.g[hidden]{display:none}select,input[type=number]{color:var(--tx)}
-</style></head><body><div id="app">
-<header><b>EXO | SKELETAL | SURFACE | REMESHER</b>
+
+/* ---------- EXO intro + about ---------- */
+html.sp-open,html.sp-open body{overflow:hidden}
+#splash{position:fixed;inset:0;z-index:100;overflow:hidden;color:#d3dacc;font:400 16px/1.55 'Bricolage Grotesque',system-ui,-apple-system,'Segoe UI',sans-serif;background:radial-gradient(ellipse 62% 72% at 68% 48%,#3a4248 0%,#2b3034 52%,#23272b 100%)}
+#splash[hidden]{display:none}
+#splash *{box-sizing:border-box}
+#sc{position:absolute;inset:0;width:100%;height:100%;display:block}
+:where(#splash) :where(h1,h2,h3,p,ul,ol,dl,dd){margin:0;padding:0}
+:where(#splash) :where(ul,ol){list-style:none}
+#splash button{font:inherit;cursor:pointer;border-radius:3px}
+#splash :focus-visible{outline:2px solid #d6ff4d;outline-offset:3px}
+.sn{position:absolute;top:0;left:0;right:0;z-index:4;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:calc(env(safe-area-inset-top,0px) + 18px) 6vw 14px}
+.sn .lg{display:flex;align-items:center;gap:10px;font-weight:700;font-size:18px;letter-spacing:.02em;color:#d6ff4d;background:none;border:0;padding:0}
+.sn .lg svg{width:26px;height:26px}
+.sn .lk{display:flex;align-items:center;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+#splash .tx{background:none;border:0;color:#cfd6c8;padding:8px 10px;font-size:15px;border-bottom:2px solid transparent;border-radius:0}
+#splash .tx:hover{color:#d6ff4d}
+#splash .tx[aria-current=page]{color:#d6ff4d;border-bottom-color:#d6ff4d}
+#splash .btn{background:#d6ff4d;color:#1c2410;border:1px solid #d6ff4d;padding:13px 22px;font-weight:600;font-size:16px}
+#splash .btn:hover{background:#e6ff86;border-color:#e6ff86}
+#splash .btn.sec{background:transparent;color:#d6ff4d;border-color:#6c7a45}
+#splash .btn.sec:hover{border-color:#d6ff4d;background:rgba(214,255,77,.08)}
+#splash .btn.sm{padding:8px 14px;font-size:14px}
+.pane{position:absolute;inset:0;transition:opacity .28s ease,visibility .28s}
+#splash[data-view=about] #intro,#splash[data-view=intro] #about{opacity:0;visibility:hidden;pointer-events:none}
+/* intro */
+#intro{display:flex;flex-direction:column;overflow-y:auto;padding:calc(env(safe-area-inset-top,0px) + 84px) 6vw calc(env(safe-area-inset-bottom,0px) + 40px)}
+#intro .col{margin:auto 0;width:min(560px,100%);position:relative;z-index:2}
+#intro h1{font-weight:800;font-stretch:75%;font-size:clamp(96px,15vw,236px);line-height:.8;letter-spacing:-.04em;color:#d6ff4d;margin-left:-.04em}
+#intro .sub{display:flex;align-items:center;flex-wrap:wrap;gap:6px 14px;margin:22px 0 22px;font-size:clamp(20px,2.3vw,32px);line-height:1.15;font-weight:500;color:#eef3e6}
+#intro .sub i{display:block;width:2px;height:1.15em;background:#d6ff4d;transform:rotate(14deg)}
+#intro .sub span:last-child{font-weight:300}
+#intro .lede{font-size:17.5px;max-width:30em;color:#d3dacc}
+.ft{margin:26px 0 30px;max-width:34em}
+.ft li,.fc li{position:relative;padding-left:24px}
+.ft li{padding-top:9px;padding-bottom:9px;border-top:1px solid rgba(147,176,74,.28);font-size:15.5px}
+.ft li:last-child{border-bottom:1px solid rgba(147,176,74,.28)}
+.ft li:before,.fc li:before{content:"";position:absolute;left:2px;width:9px;height:9px;border:1.5px solid #d6ff4d;transform:rotate(45deg) scale(.82)}
+.ft li:before{top:17px}
+.cta{display:flex;flex-wrap:wrap;gap:12px}
+.hud{position:absolute;right:6vw;bottom:calc(env(safe-area-inset-bottom,0px) + 40px);z-index:2;width:236px;padding:12px 14px;background:rgba(38,43,47,.72);border:1px solid #566068;border-radius:4px;font:11.5px/1.9 ui-monospace,Menlo,Consolas,monospace;color:#93b04a;pointer-events:none}
+.hud .hr{display:grid;grid-template-columns:54px 1fr auto;gap:8px}
+.hud .hr b{color:#d6ff4d;font-weight:500;text-align:right}
+.hud .hb{display:block;height:3px;margin-top:8px;background:#566068}
+.hud .hb span{display:block;height:100%;width:0;background:#d6ff4d}
+/* about */
+#about{overflow-y:auto;background:rgba(34,38,42,.92);-webkit-backdrop-filter:blur(5px);backdrop-filter:blur(5px);padding:calc(env(safe-area-inset-top,0px) + 96px) 6vw calc(env(safe-area-inset-bottom,0px) + 60px)}
+#splash[data-view=about] .sn{background:linear-gradient(#22262a 72%,rgba(34,38,42,0))}
+.ab{max-width:1120px;margin:0 auto}
+.ab h2{font-weight:800;font-stretch:80%;font-size:clamp(40px,6.4vw,84px);line-height:.95;letter-spacing:-.03em;color:#d6ff4d;max-width:12em}
+.ab .big{font-size:clamp(18px,1.8vw,22px);line-height:1.5;max-width:36em;margin-top:26px;color:#eef3e6}
+.ab section{margin-top:72px}
+.ab h3.sh{font-size:clamp(24px,2.6vw,32px);font-weight:700;font-stretch:85%;letter-spacing:-.01em;color:#eef3e6;margin-bottom:8px}
+.ab .sp{max-width:38em;color:#cfd6c8;margin-bottom:28px}
+.fg{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:40px 34px}
+.fc{border-top:2px solid #d6ff4d;padding-top:14px}
+.fc h3{font-size:20px;font-weight:700;margin-bottom:10px;color:#eef3e6}
+.fc li{padding:6px 0 6px 24px;font-size:15px;color:#cfd6c8}
+.fc li:before{top:13px}
+.wf{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:26px 22px;counter-reset:s}
+.wf li{counter-increment:s;border-left:1px solid #566068;padding-left:16px}
+.wf li:before{content:counter(s);display:block;font:500 28px/1 ui-monospace,Menlo,Consolas,monospace;color:#d6ff4d;margin-bottom:10px}
+.wf strong{display:block;font-size:18px;color:#eef3e6;margin-bottom:4px}
+.wf p{font-size:14.5px;color:#cfd6c8;line-height:1.5}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:44px}
+.kb{display:grid;grid-template-columns:auto 1fr;gap:10px 18px;align-items:center;font-size:15px}
+.kb dt{display:flex;gap:5px;flex-wrap:wrap}
+.kb dd{color:#cfd6c8}
+#splash kbd{font:12px/1 ui-monospace,Menlo,Consolas,monospace;color:#d6ff4d;background:#3b4147;border:1px solid #5a646c;border-radius:3px;padding:4px 7px}
+.fm p{margin-bottom:14px;color:#cfd6c8}
+.fm p b{display:block;font-weight:600;color:#eef3e6;margin-bottom:2px}
+.nt p{max-width:44em;margin-bottom:14px;color:#cfd6c8}
+.ab .end{display:flex;align-items:center;flex-wrap:wrap;gap:16px 24px;margin-top:72px;padding-top:28px;border-top:1px solid #566068}
+.ab .end span{font:12px ui-monospace,Menlo,Consolas,monospace;color:#93b04a;flex:1 1 280px}
+@media(max-width:760px){
+ #intro .col{margin:auto 0 0}
+ #intro h1{font-size:clamp(84px,27vw,150px)}
+ #intro .lede{font-size:16px}
+ .ft li:nth-child(n+3){display:none}
+ .ft{margin:18px 0 22px}
+ .hud{display:none}
+ .cta .btn:nth-child(3){display:none}
+ .sn .lg b{display:none}
+ #splash .tx{padding:8px 6px;font-size:14px}
+ #about{padding-top:calc(env(safe-area-inset-top,0px) + 84px)}
+}
+@media(prefers-reduced-motion:reduce){.pane{transition:none}}
+</style></head><body>
+<div id="splash" data-view="intro" role="region" aria-label="EXO | Surface Retopology | Vertascan">
+<canvas id="sc" aria-hidden="true"></canvas>
+<div class="sn">
+ <button class="lg" data-go="intro" aria-label="EXO intro"><svg viewBox="0 0 26 26" fill="none" stroke="#d6ff4d" stroke-width="1.8" aria-hidden="true"><path d="M3 3h20v20H3z"/><path d="M13 3v20M3 13h20" stroke-width="1.2"/><circle cx="13" cy="13" r="2" fill="#d6ff4d" stroke="none"/></svg><b>EXO</b></button>
+ <div class="lk"><button class="tx" data-go="intro" aria-current="page">Intro</button><button class="tx" data-go="about">About</button><button class="btn sm" data-go="app">Open workspace</button></div>
+</div>
+<div id="intro" class="pane">
+ <div class="col">
+  <h1 tabindex="-1">EXO</h1>
+  <div class="sub"><span>Surface Retopology</span><i></i><span>Vertascan</span></div>
+  <p class="lede">Turn dense scans, sculpts and photogrammetry meshes into clean quad topology. Vertascan sweeps your surface, repairs it, and rebuilds it, in your browser, with nothing uploaded.</p>
+  <ul class="ft">
+   <li>Auto quad retopo guided by a curvature flow field</li>
+   <li>Draw, face, loop and bridge tools that snap to your source</li>
+   <li>Heal, decimate, smooth and remesh with a live preview</li>
+   <li>Normal-map bake and GLB or OBJ export with UVs and skeleton</li>
+  </ul>
+  <div class="cta"><button class="btn" data-go="app">Open workspace</button><button class="btn sec" data-go="sample">Load sample mesh</button><button class="btn sec" data-go="about">About EXO</button></div>
+ </div>
+ <div class="hud" aria-hidden="true">
+  <div class="hr"><span>Source</span><b id="hs">38,640</b><span>tris</span></div>
+  <div class="hr"><span>Retopo</span><b id="hq">0</b><span>quads</span></div>
+  <span class="hb"><span id="hp"></span></span>
+ </div>
+</div>
+<div id="about" class="pane">
+ <div class="ab">
+  <h2 tabindex="-1">Clean topology from any surface</h2>
+  <p class="big">EXO | Surface Retopology | Vertascan is a workspace for rebuilding heavy, noisy or triangulated meshes as tidy quad topology you can rig, sculpt, texture and ship. Vertascan is the pass at its core: it reads the source surface, repairs it, and lays a low-poly mesh over it that follows the form.</p>
+
+  <section>
+   <h3 class="sh">What you can do</h3>
+   <p class="sp">Everything runs locally in the page. Meshes are processed on your machine and are never sent anywhere.</p>
+   <div class="fg">
+    <div class="fc"><h3>Prepare</h3><ul>
+     <li>Import GLB, glTF, OBJ, STL and PLY</li>
+     <li>A validation panel flags problems before you start</li>
+     <li>Weld duplicates, drop degenerate faces and tiny fragments, fill holes</li>
+     <li>Repair winding so every face points outward</li></ul></div>
+    <div class="fc"><h3>Rebuild</h3><ul>
+     <li>Auto quad retopo guided by a curvature flow field</li>
+     <li>Isotropic remesh, or voxel remesh straight to quads</li>
+     <li>Quadric decimation with LOD1 to LOD3 generation</li>
+     <li>Pair triangles into quads above a quality threshold</li>
+     <li>Taubin smoothing with borders held fixed</li></ul></div>
+    <div class="fc"><h3>Retopologize by hand</h3><ul>
+     <li>Vertex, Draw and Face tools that snap to vertices and to the source surface</li>
+     <li>Select vertices, edges or faces, then move, rotate or scale</li>
+     <li>Insert edge loops and bridge edge chains</li>
+     <li>Reproject to the source, then commit to a mesh</li></ul></div>
+    <div class="fc"><h3>Inspect</h3><ul>
+     <li>Shaded, curvature and triangle-quality views</li>
+     <li>Result, source, overlay and split comparison</li>
+     <li>Wireframe, backfaces, orthographic camera and a clip slider</li></ul></div>
+    <div class="fc"><h3>Deliver</h3><ul>
+     <li>Bake source detail into a tangent-space normal map at 512, 1024 or 2048</li>
+     <li>Export GLB with UVs and the original skeleton</li>
+     <li>Export OBJ with quads and UVs</li>
+     <li>Skeleton-aware decimation keeps resolution near joints</li>
+     <li>Undo, redo and recover your last session</li></ul></div>
+   </div>
+  </section>
+
+  <section>
+   <h3 class="sh">A typical pass</h3>
+   <p class="sp">The Workflow theme in the workspace header shows one stage at a time and keeps the panels you need in view.</p>
+   <ol class="wf">
+    <li><strong>Import</strong><p>Load a mesh or the sample and check the validation panel.</p></li>
+    <li><strong>Heal</strong><p>Weld, fill holes and fix winding, then preview and apply.</p></li>
+    <li><strong>Remesh</strong><p>Decimate, remesh or run auto quad retopo, then apply the preview.</p></li>
+    <li><strong>Retopo</strong><p>Draw, build faces, loop and bridge, then commit to a mesh.</p></li>
+    <li><strong>Bake</strong><p>Bake source detail into a tangent-space normal map.</p></li>
+    <li><strong>Export</strong><p>Save GLB with UVs and skeleton, or OBJ.</p></li>
+   </ol>
+  </section>
+
+  <section class="two">
+   <div>
+    <h3 class="sh">Shortcuts</h3>
+    <dl class="kb">
+     <dt><kbd>O</kbd><kbd>V</kbd><kbd>D</kbd><kbd>F</kbd><kbd>S</kbd></dt><dd>Orbit, Vertex, Draw, Face, Select</dd>
+     <dt><kbd>W</kbd><kbd>E</kbd><kbd>R</kbd></dt><dd>Move, rotate, scale gizmo</dd>
+     <dt><kbd>1</kbd><kbd>2</kbd><kbd>3</kbd></dt><dd>Vertex, edge, face selection</dd>
+     <dt><kbd>Enter</kbd></dt><dd>Make a face from picked vertices</dd>
+     <dt><kbd>Del</kbd></dt><dd>Delete the selection</dd>
+     <dt><kbd>Ctrl</kbd><kbd>Z</kbd> <kbd>Ctrl</kbd><kbd>Y</kbd></dt><dd>Undo and redo</dd>
+    </dl>
+   </div>
+   <div class="fm">
+    <h3 class="sh">Formats</h3>
+    <p><b>In</b>GLB, glTF, OBJ, STL, PLY</p>
+    <p><b>Out</b>GLB with UVs and skeleton, OBJ with quads and UVs, normal map as PNG</p>
+   </div>
+  </section>
+
+  <section class="nt">
+   <h3 class="sh">Good to know</h3>
+   <p>Import welds positions and flattens the hierarchy. UVs and skin weights are carried across and re-projected from the source after every remesh.</p>
+   <p>Auto retopo is an isotropic remesh with edge flips, followed by quad pairing guided by a smoothed curvature flow field. It does not solve for singularities or a global parametrization, so expect to tidy poles by hand with the manual tools.</p>
+   <p>Skinned GLB export copies the imported skeleton in its rest pose.</p>
+  </section>
+
+  <div class="end"><button class="btn" data-go="app">Open workspace</button><button class="btn sec" data-go="sample">Load sample mesh</button><span>EXO | Surface Retopology | Vertascan</span></div>
+ </div>
+</div>
+</div>
+<div id="app">
+<header><b>EXO | SURFACE RETOPOLOGY | VERTASCAN</b>
 <button id="imp" class="p">Import</button><input id="file" type="file" hidden accept=".glb,.gltf,.obj,.stl,.ply"><button id="smp">Sample</button>
 <button id="un">Undo</button><button id="re">Redo</button><button id="cn">Cancel</button>
-<button id="eg">Export GLB</button><button id="eo">Export OBJ</button><button id="rc">Recover</button><select id="thm" title="Theme"><option value="graphite">Theme: Graphite Lime</option><option value="workflow">Theme: Workflow</option></select><nav id="stp"></nav></header>
+<button id="eg">Export GLB</button><button id="eo">Export OBJ</button><button id="rc">Recover</button><select id="thm" title="Theme"><option value="graphite">Theme: Graphite Lime</option><option value="workflow">Theme: Workflow</option></select><button id="abt" title="About EXO">About</button><nav id="stp"></nav></header>
 <aside id="L"><h4>Assets / hierarchy</h4><div id="al" class="mu">No mesh loaded</div>
 <h4>Manual retopology</h4>
 <div class="r" id="tl"><button data-t="orbit" class="p">Orbit</button><button data-t="vtx">Vertex</button><button data-t="draw">Draw</button><button data-t="face">Face</button><button data-t="sel">Select</button></div>
@@ -214,15 +410,15 @@ $('#smp').onclick=()=>{let g=new THREE.TorusKnotGeometry(1,.3,220,36).toNonIndex
  for(let t=0;t<F;t++){if(t%997===3||t%1499===7)continue;for(let k=0;k<9;k++)keep.push(p[9*t+k])}const a=Float32Array.from(keep);for(let k=0;k<a.length;k+=3){const s=noise(a[k],a[k+1],a[k+2]);a[k]+=s;a[k+1]+=s;a[k+2]+=s}
  const w=weld(a,1e-4);setNew(w,'noisy-torus-knot (with holes)')};
 function dl_(b,n){const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=n;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),4000)}
-$('#eo').onclick=()=>{if(!cur)return;const m=cur,q=m.q,s=['# EXO Remesher export'],T=[],F=[],hu=!!(src&&src.uv),gr=[];let t=0;for(let k=0;k<m.p.length;k+=3)s.push('v '+m.p[k]+' '+m.p[k+1]+' '+m.p[k+2]);
+$('#eo').onclick=()=>{if(!cur)return;const m=cur,q=m.q,s=['# EXO | Surface Retopology | Vertascan export'],T=[],F=[],hu=!!(src&&src.uv),gr=[];let t=0;for(let k=0;k<m.p.length;k+=3)s.push('v '+m.p[k]+' '+m.p[k+1]+' '+m.p[k+2]);
  if(q){for(let k=0;k<q.length;k+=4)gr.push([[q[k],q[k+1],q[k+2],q[k+3]]]);for(let k=0;k<m.qt.length;k+=3)gr.push([[m.qt[k],m.qt[k+1],m.qt[k+2]]])}else for(let k=0;k<m.i.length;k+=3)gr.push([[m.i[k],m.i[k+1],m.i[k+2]],m.uv&&m.uv.subarray(2*k,2*k+6)]);
  for(const [ids,u0] of gr){const uv=u0||(hu?uvOf(m,ids):null);if(uv){ids.forEach((v,k)=>T.push('vt '+uv[2*k]+' '+(uvTop?1-uv[2*k+1]:uv[2*k+1])));F.push('f '+ids.map((v,k)=>(v+1)+'/'+(t+k+1)).join(' '));t+=ids.length}else F.push('f '+ids.map(v=>v+1).join(' '))}
- dl_(new Blob([s.concat(T,F).join('\n')],{type:'text/plain'}),'exo-remesh.obj');log('OBJ exported'+(q?' with quads':'')+(t?' + UVs':''),'var(--ac)')};
+ dl_(new Blob([s.concat(T,F).join('\n')],{type:'text/plain'}),'exo-retopo.obj');log('OBJ exported'+(q?' with quads':'')+(t?' + UVs':''),'var(--ac)')};
 $('#eg').onclick=()=>{if(!cur)return;let g=geo(cur),J=cur.sj,W=cur.sw;const sk=skel&&cur.sw;
  if(cur.uv){g=g.toNonIndexed();g.setAttribute('uv',new THREE.BufferAttribute(uvTop?cur.uv:cur.uv.map((v,k)=>k%2?1-v:v),2));if(sk){const I=cur.i;J=new Uint16Array(I.length*4);W=new Float32Array(I.length*4);for(let c=0;c<I.length;c++){J.set(cur.sj.subarray(4*I[c],4*I[c]+4),4*c);W.set(cur.sw.subarray(4*I[c],4*I[c]+4),4*c)}}}
  let out=new THREE.Mesh(g,new THREE.MeshStandardMaterial());
  if(sk){g.setAttribute('skinIndex',new THREE.Uint16BufferAttribute(J,4));g.setAttribute('skinWeight',new THREE.Float32BufferAttribute(W,4));const root=new THREE.Group();skel.bones.forEach(b=>{if(!b.parent||!b.parent.isBone)root.attach(b)});root.updateMatrixWorld(true);const skm=new THREE.SkinnedMesh(g,out.material);skm.bind(new THREE.Skeleton(skel.bones,skel.boneInverses),new THREE.Matrix4());out=new THREE.Group();out.add(root,skm)}
- new THREE.GLTFExporter().parse(out,r=>{dl_(new Blob([r],{type:'model/gltf-binary'}),'exo-remesh.glb');log('GLB exported'+(sk?' with skeleton + weights (rest pose)':' (triangulated)'),'var(--ac)')},{binary:true})};
+ new THREE.GLTFExporter().parse(out,r=>{dl_(new Blob([r],{type:'model/gltf-binary'}),'exo-retopo.glb');log('GLB exported'+(sk?' with skeleton + weights (rest pose)':' (triangulated)'),'var(--ac)')},{binary:true})};
 const idb=()=>new Promise((r,j)=>{const q=indexedDB.open('exo-remesher',1);q.onupgradeneeded=()=>q.result.createObjectStore('s');q.onsuccess=()=>r(q.result);q.onerror=()=>j(q.error)});
 async function save(){try{const d=await idb();d.transaction('s','readwrite').objectStore('s').put({cur,src,name,uvTop},'k')}catch(e){}}
 $('#rc').onclick=async()=>{try{const d=await idb(),q=d.transaction('s').objectStore('s').get('k');q.onsuccess=()=>{const v=q.result;if(!v)return log('nothing to recover','var(--wr)');src=v.src;name=v.name;uvTop=!!v.uvTop;lods=[];hist=[];hi=-1;fit(v.cur);commit(v.cur,'recovered project');log('recovered autosave','var(--ac)')}}catch(e){log('recovery failed','var(--er)')}};
@@ -405,4 +601,103 @@ addEventListener('keydown',e=>{if(/INPUT|SELECT/.test(e.target.tagName))return;c
  $('#thm').onchange=e=>{th=e.target.value;try{localStorage.setItem('exo-theme',th)}catch(x){}apply()};
  try{const t=localStorage.getItem('exo-theme');if(t){th=t;$('#thm').value=t}}catch(x){}apply()})();
 log('Ready. Import a mesh or load the sample (it has seam duplicates, noise and holes).');
-</script></body></html>
+</script><script>
+// ---- procedural model: a 2,3 torus knot with a swelling tube ----
+const KP=2,KQ=3,KS=0.55;
+const rngf=s=>()=>(s=(s*1664525+1013904223)>>>0)/4294967296;
+const nrm=a=>{const l=Math.hypot(a[0],a[1],a[2])||1;a[0]/=l;a[1]/=l;a[2]/=l;return a};
+const crs=(a,b)=>[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]];
+const kc=u=>{const r=Math.cos(KQ*u)+2;return[r*Math.cos(KP*u),r*Math.sin(KP*u),-Math.sin(KQ*u)]};
+function surf(u,v,k){
+ const a=kc(u),b=kc(u+1e-3),T=nrm([b[0]-a[0],b[1]-a[1],b[2]-a[2]]);
+ const B=nrm(crs(T,[a[0]+b[0],a[1]+b[1],a[2]+b[2]])),N=crs(B,T);
+ const rad=(0.4+0.09*Math.sin(3*u+1))*k,c=Math.cos(v)*rad,s=Math.sin(v)*rad;
+ return[(a[0]+c*N[0]+s*B[0])*KS,(a[1]+c*N[1]+s*B[1])*KS,(a[2]+c*N[2]+s*B[2])*KS]}
+const gidx=(i,j,nu,nv)=>(((i%nu)+nu)%nu)*nv+(((j%nv)+nv)%nv);
+function gridPts(nu,nv,k,jit,rnd){const o=new Float32Array(nu*nv*3),T=Math.PI*2;
+ for(let i=0;i<nu;i++)for(let j=0;j<nv;j++){const p=surf((i+(rnd()-.5)*jit)*T/nu,(j+(rnd()-.5)*jit)*T/nv,k);o.set(p,3*(i*nv+j))}return o}
+function segs(P,pairs){const o=new Float32Array(pairs.length*3);for(let n=0;n<pairs.length;n++){const a=pairs[n];o[3*n]=P[3*a];o[3*n+1]=P[3*a+1];o[3*n+2]=P[3*a+2]}return o}
+function quadEdges(nu,nv){const e=[];for(let i=0;i<nu;i++)for(let j=0;j<nv;j++){const a=gidx(i,j,nu,nv);e.push(a,gidx(i+1,j,nu,nv),a,gidx(i,j+1,nu,nv))}return e}
+function triEdges(nu,nv,rnd){const e=[];for(let i=0;i<nu;i++)for(let j=0;j<nv;j++){const a=gidx(i,j,nu,nv);e.push(a,gidx(i+1,j,nu,nv),a,gidx(i,j+1,nu,nv));e.push(a,rnd()<.5?gidx(i+1,j+1,nu,nv):gidx(i+1,j-1,nu,nv))}return e}
+function gridTris(nu,nv){const t=[];for(let i=0;i<nu;i++)for(let j=0;j<nv;j++){const a=gidx(i,j,nu,nv),b=gidx(i+1,j,nu,nv),c=gidx(i+1,j+1,nu,nv),d=gidx(i,j+1,nu,nv);t.push(a,b,c,a,c,d)}return t}
+
+// ---- scene + routing ----
+(function(){
+const $=s=>document.querySelector(s),sp=$('#splash'),cv=$('#sc'),root=document.documentElement;
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const DU=420,DV=46,CU=120,CV=16,OU=240,OV=28,TOP=2.05,BOT=-2.05,TRIS=2*DU*DV,QUADS=CU*CV;
+let R=null,scene,cam,spin,disc,ring,denseL,cleanL,cleanP,scanP,occD,occC,clock=0,last=0,raf=0,par=0,parT=0,shown=-1;
+const pD=new THREE.Plane(new THREE.Vector3(0,-1,0),0),pC=new THREE.Plane(new THREE.Vector3(0,1,0),0),
+ pS1=new THREE.Plane(new THREE.Vector3(0,1,0),0),pS2=new THREE.Plane(new THREE.Vector3(0,-1,0),0);
+function build(){
+ R=new THREE.WebGLRenderer({canvas:cv,antialias:true,alpha:true});R.setPixelRatio(Math.min(devicePixelRatio||1,2));R.setClearColor(0,0);R.localClippingEnabled=true;
+ scene=new THREE.Scene();cam=new THREE.PerspectiveCamera(35,1,.1,100);
+ scene.add(new THREE.AmbientLight(0xffffff,.85));const dl=new THREE.DirectionalLight(0xffffff,.55);dl.position.set(3,5,4);scene.add(dl);
+ spin=new THREE.Group();scene.add(spin);
+ const rnd=rngf(7),bg=(a,n)=>{const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.BufferAttribute(a,3));return g};
+ // occluding surface (slightly inside the wires) in two tones, split by the scan plane
+ const og=new THREE.BufferGeometry();og.setAttribute('position',new THREE.BufferAttribute(gridPts(OU,OV,.965,0,rnd),3));og.setIndex(gridTris(OU,OV));og.computeVertexNormals();
+ const sm=(c,pl)=>new THREE.MeshLambertMaterial({color:c,side:THREE.DoubleSide,clippingPlanes:[pl],polygonOffset:true,polygonOffsetFactor:1,polygonOffsetUnits:1});
+ occD=new THREE.Mesh(og,sm(0x2e353b,pD));occC=new THREE.Mesh(og,sm(0x34421a,pC));spin.add(occD,occC);
+ // messy source triangles
+ const dp=gridPts(DU,DV,1,.85,rnd);
+ denseL=new THREE.LineSegments(bg(segs(dp,triEdges(DU,DV,rnd))),new THREE.LineBasicMaterial({color:0x8a979e,transparent:true,opacity:.5,clippingPlanes:[pD]}));
+ // clean quad retopo
+ const cp=gridPts(CU,CV,1,0,rnd);
+ cleanL=new THREE.LineSegments(bg(segs(cp,quadEdges(CU,CV))),new THREE.LineBasicMaterial({color:0xd6ff4d,transparent:true,opacity:.95,clippingPlanes:[pC]}));
+ cleanP=new THREE.Points(bg(cp),new THREE.PointsMaterial({color:0xefffa8,size:.06,transparent:true,clippingPlanes:[pC]}));
+ // sparkle band riding the scan plane
+ scanP=new THREE.Points(bg(dp),new THREE.PointsMaterial({color:0xf4ffc4,size:.075,transparent:true,opacity:0,clippingPlanes:[pS1,pS2]}));
+ spin.add(denseL,cleanL,cleanP,scanP);
+ // scan disc + ring
+ disc=new THREE.Mesh(new THREE.CircleGeometry(2.3,72),new THREE.MeshBasicMaterial({color:0xd6ff4d,transparent:true,opacity:0,side:THREE.DoubleSide,depthWrite:false}));disc.rotation.x=-Math.PI/2;
+ const rp=[];for(let i=0;i<=128;i++){const a=i/128*Math.PI*2;rp.push(Math.cos(a)*2.3,0,Math.sin(a)*2.3)}
+ const rg=new THREE.BufferGeometry();rg.setAttribute('position',new THREE.BufferAttribute(new Float32Array(rp),3));
+ ring=new THREE.Line(rg,new THREE.LineBasicMaterial({color:0xd6ff4d,transparent:true,opacity:0}));
+ scene.add(disc,ring);
+}
+const ease=x=>{x=Math.max(0,Math.min(1,x));return x*x*(3-2*x)};
+function size(){if(!R)return;const w=sp.clientWidth||innerWidth,h=sp.clientHeight||innerHeight,a=w/h,wide=a>1.05;
+ R.setSize(w,h,false);cam.aspect=a;const d=Math.max(8.4,(wide?2.5:3.2)/(Math.tan(17.5*Math.PI/180)*a));
+ cam.position.set(0,d*.2,d);cam.lookAt(0,0,0);cam.clearViewOffset();cam.setViewOffset(w,h,wide?-w*.19:0,wide?0:h*.27,w,h)}
+function draw(t){
+ const fade=reduce?1:Math.min(1,t/1.4),c=reduce?3.9:t%10;let p;
+ if(c<1.4)p=0;else if(c<6.4)p=ease((c-1.4)/5);else if(c<8.9)p=1;else if(c<9.9)p=1-ease(c-8.9);else p=0;
+ const y=TOP+(BOT-TOP)*p,vis=ease(p*14)*ease((1-p)*14);
+ pD.constant=y;pC.constant=-y;pS1.constant=.07-y;pS2.constant=y+.07;
+ disc.position.y=ring.position.y=y;disc.material.opacity=vis*.08;ring.material.opacity=vis*.9;
+ scanP.material.opacity=vis;scanP.visible=vis>.01;
+ denseL.material.opacity=.5*fade;cleanL.material.opacity=.95*fade;
+ cleanP.material.size=.06+(p>=1?.014*Math.sin(t*3):0);
+ par+=(parT-par)*.05;spin.rotation.y=reduce?.5:.5+t*.2+par;
+ R.render(scene,cam);
+ const q=Math.round(QUADS*p);if(q!==shown){shown=q;$('#hq').textContent=q.toLocaleString('en-US');$('#hs').textContent=Math.round(TRIS*(1-p)).toLocaleString('en-US');$('#hp').style.width=(p*100).toFixed(1)+'%'}}
+function frame(now){raf=requestAnimationFrame(frame);clock+=Math.min(.1,(now-last)/1000);last=now;draw(clock)}
+function start(){if(!R||raf)return;size();if(reduce){draw(3.9);return}last=performance.now();raf=requestAnimationFrame(frame)}
+function stop(){if(raf)cancelAnimationFrame(raf);raf=0}
+try{build()}catch(e){R=null;cv.style.display='none'}
+addEventListener('resize',()=>{if(!sp.hidden){size();if(reduce&&R)draw(3.9)}});
+sp.addEventListener('pointermove',e=>{parT=(e.clientX/innerWidth-.5)*.5});
+document.addEventListener('visibilitychange',()=>{if(document.hidden)stop();else if(!sp.hidden)start()});
+
+// ---- routing: #intro, #about, #app ----
+const V=['intro','about','app'];let first=true,wantSample=false;
+function apply(v){
+ if(!V.includes(v))v='intro';
+ if(v==='app'){sp.hidden=true;root.classList.remove('sp-open');stop();
+  if(wantSample){wantSample=false;const b=$('#smp');b&&b.click()}return}
+ sp.hidden=false;sp.dataset.view=v;root.classList.add('sp-open');
+ sp.querySelectorAll('.lk .tx').forEach(b=>{b.dataset.go===v?b.setAttribute('aria-current','page'):b.removeAttribute('aria-current')});
+ $('#about').scrollTop=0;start();
+ if(!first){const h=$(v==='about'?'#about h2':'#intro h1');h&&h.focus({preventScroll:true})}}
+function route(){apply(location.hash.slice(1));first=false}
+function nav(v){if(v==='sample'){wantSample=true;v='app'}
+ if(location.hash==='#'+v)route();else{try{location.hash=v}catch(e){apply(v)}}}
+sp.addEventListener('click',e=>{const b=e.target.closest('[data-go]');if(b)nav(b.dataset.go)});
+$('#abt').addEventListener('click',()=>nav('about'));
+addEventListener('hashchange',route);
+addEventListener('keydown',e=>{if(e.key==='Escape'&&!sp.hidden&&sp.dataset.view==='about')nav('intro')});
+route();
+})();
+</script>
+</body></html>
