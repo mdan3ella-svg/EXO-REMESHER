@@ -4,7 +4,7 @@
 <style>
 :root{color-scheme:dark;--bg:#2f3439;--pn:#3b4147;--ln:#5a646c;--tx:#bff03c;--mu:#93b04a;--ac:#d6ff4d;--wr:#ffd24a;--er:#ff8a7a;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 *{box-sizing:border-box}html,body{margin:0;height:100%;background:var(--bg);color:var(--tx);font:12px/1.4 ui-monospace,Menlo,Consolas,monospace}
-#app{display:grid;height:100%;grid-template:"h h h" auto "l v r" 1fr "b b b" 160px/200px 1fr 250px}
+#app{display:grid;height:100%;grid-template:"h h h" auto "l v r" 1fr "b b b" 160px/232px 1fr 250px}
 header{grid-area:h;display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:6px 8px;background:var(--pn);border-bottom:1px solid var(--ln)}
 header b{color:var(--ac);letter-spacing:.08em;margin-right:8px}
 aside{background:var(--pn);overflow:auto;padding:8px}#L{grid-area:l;border-right:1px solid var(--ln)}#Rp{grid-area:r;border-left:1px solid var(--ln)}
@@ -24,6 +24,14 @@ table{border-collapse:collapse;width:100%}td{padding:1px 4px;border-bottom:1px s
 @media(max-width:820px){#app{display:block;height:auto}#vp{height:55vh}footer{display:block;height:auto}}
 #tb{position:absolute;left:8px;top:8px;right:8px;display:flex;gap:4px;flex-wrap:wrap;align-items:center;background:#3b4147ee;border:1px solid var(--ln);border-radius:6px;padding:4px;z-index:5}#tb .sp{width:1px;height:18px;background:var(--ln);margin:0 2px}#tb button{min-width:28px;padding:3px 6px}
 #stp{display:none;flex-basis:100%;gap:4px;align-items:center;flex-wrap:wrap;padding-top:4px;border-top:1px solid var(--ln)}#app[data-th=workflow] #stp{display:flex}#stp button.on{background:var(--ac);color:#252d14;border-color:var(--ac);font-weight:bold}#stp .hint{color:var(--mu);margin-left:6px}.g[hidden]{display:none}select,input[type=number]{color:var(--tx)}
+
+#ly{display:flex;flex-direction:column;gap:2px;margin-bottom:6px}
+.lr{display:grid;grid-template-columns:22px 22px 1fr 22px;gap:2px;align-items:center;border:1px solid var(--ln);border-radius:3px;padding:1px 3px}
+.lr.a{border-color:var(--ac);background:#434b52}.lr.lk .n{color:var(--mu)}
+.lr button{padding:1px 0;min-width:0;background:none;border:0;font-size:12px;line-height:1.5;color:var(--mu)}
+.lr button.on{color:var(--ac)}.lr .n{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:pointer;padding:2px 0}
+#up{border-left:2px solid var(--ln);padding-left:6px;margin:4px 0 6px}#up label span{min-width:34px;text-align:right}#up input:disabled,#up select:disabled,#up button:disabled{opacity:.4;cursor:not-allowed}
+#up [hidden]{display:none}
 
 /* ---------- EXO intro + about ---------- */
 html.sp-open,html.sp-open body{overflow:hidden}
@@ -125,7 +133,7 @@ html.sp-open,html.sp-open body{overflow:hidden}
   <p class="lede">Turn dense scans, sculpts and photogrammetry meshes into clean quad topology. Vertascan sweeps your surface, repairs it, and rebuilds it, in your browser, with nothing uploaded.</p>
   <ul class="ft">
    <li>Auto quad retopo guided by a curvature flow field</li>
-   <li>Draw, face, loop and bridge tools that snap to your source</li>
+   <li>Draw, face, loop and bridge tools that snap to your source or imported underlays</li>
    <li>Heal, decimate, smooth and remesh with a live preview</li>
    <li>Normal-map bake and GLB or OBJ export with UVs and skeleton</li>
   </ul>
@@ -161,6 +169,8 @@ html.sp-open,html.sp-open body{overflow:hidden}
      <li>Vertex, Draw and Face tools that snap to vertices and to the source surface</li>
      <li>Select vertices, edges or faces, then move, rotate or scale</li>
      <li>Insert edge loops and bridge edge chains</li>
+     <li>Import surface underlays and sketch images to trace over</li>
+     <li>Lock the retopo sketch, the source or any underlay to make it read-only</li>
      <li>Reproject to the source, then commit to a mesh</li></ul></div>
     <div class="fc"><h3>Inspect</h3><ul>
      <li>Shaded, curvature and triangle-quality views</li>
@@ -224,6 +234,22 @@ html.sp-open,html.sp-open body{overflow:hidden}
 <button id="un">Undo</button><button id="re">Redo</button><button id="cn">Cancel</button>
 <button id="eg">Export GLB</button><button id="eo">Export OBJ</button><button id="rc">Recover</button><select id="thm" title="Theme"><option value="graphite">Theme: Graphite Lime</option><option value="workflow">Theme: Workflow</option></select><button id="abt" title="About EXO">About</button><nav id="stp"></nav></header>
 <aside id="L"><h4>Assets / hierarchy</h4><div id="al" class="mu">No mesh loaded</div>
+<h4>Layers &amp; underlays</h4>
+<div id="ly"></div>
+<div class="r"><button id="uam" class="p" title="Import a mesh as a surface-form reference">+ Surface underlay</button><button id="uai" class="p" title="Import an image as a sketch reference plane">+ Sketch image</button></div>
+<input id="ufm" type="file" hidden accept=".glb,.gltf,.obj,.stl,.ply"><input id="ufi" type="file" hidden accept="image/*">
+<div id="up" hidden>
+<div class="mu" id="upn"></div>
+<label>Opacity<input type="range" id="uo" min="5" max="100"><span id="uov"></span></label>
+<label>Scale<input type="range" id="us" min="10" max="300"><span id="usv"></span></label>
+<label>Rotate Y<input type="range" id="ur" min="-180" max="180"><span id="urv"></span></label>
+<label>Move X<input type="range" id="ux" min="-150" max="150"></label><label>Move Y<input type="range" id="uy" min="-150" max="150"></label><label>Move Z<input type="range" id="uz" min="-150" max="150"></label>
+<div id="uim"><label>Plane<select id="uor"><option value="front">Front (XY)</option><option value="side">Side (ZY)</option><option value="top">Top (XZ)</option></select></label><label><input type="checkbox" id="ufl">Flip</label><label><input type="checkbox" id="utp">Draw over model</label></div>
+<div class="r"><button id="ufit">Fit to source</button><button id="udel">Remove</button></div>
+</div>
+<div id="uhint" class="mu"></div>
+<div class="mu">◎ marks the surface that Vertex, Draw and Face click on and snap to. Sketch images are traced on their plane, then projected through onto the source. 🔒 makes a layer view-only.</div>
+
 <h4>Manual retopology</h4>
 <div class="r" id="tl"><button data-t="orbit" class="p">Orbit</button><button data-t="vtx">Vertex</button><button data-t="draw">Draw</button><button data-t="face">Face</button><button data-t="sel">Select</button></div>
 <label>Select<select id="smd"><option value="v">Vertex</option><option value="e">Edge</option><option value="f">Face</option></select></label>
@@ -231,7 +257,7 @@ html.sp-open,html.sp-open body{overflow:hidden}
 <label><input type="checkbox" id="ksv" checked>Snap to vertices</label><label><input type="checkbox" id="kss" checked>Snap to surface</label>
 <div class="r"><button id="bmf">Make face ⏎</button><button id="bdl">Delete ⌫</button><button data-a="loop">Loop</button><button data-a="bridge">Bridge</button><button id="brp">Reproject</button><button id="bru">Undo edit</button><button id="bcl">Clear</button><button id="bcm" class="p">Commit → mesh</button></div><div id="rst" class="mu"></div>
 <div class="mu">Vertex: click surface · Draw: drag strokes · Face: click 3–4 verts (⏎ for a tri) · Select: click, shift adds, then drag the gizmo. Right-drag still orbits/pans. Click targets the Result (or Source) surface.</div>
-<h4>Notes</h4><div class="mu">Import welds positions and flattens hierarchy; UVs and skin weights are carried per-corner/per-vertex and re-projected from the source after every remesh. Auto retopo = isotropic remesh (with edge flips) + quad pairing guided by a smoothed curvature 4-RoSy field (no singularity/parametrization solve). Skinned GLB export copies the imported skeleton in rest pose. Shortcuts: O V D F S, W E R, 1 2 3, Ctrl+Z/Y.</div></aside>
+<h4>Notes</h4><div class="mu">Import welds positions and flattens hierarchy; UVs and skin weights are carried per-corner/per-vertex and re-projected from the source after every remesh. Auto retopo = isotropic remesh (with edge flips) + quad pairing guided by a smoothed curvature 4-RoSy field (no singularity/parametrization solve). Underlays are references only: they are never remeshed or exported. Skinned GLB export copies the imported skeleton in rest pose. Shortcuts: O V D F S, W E R, 1 2 3, Ctrl+Z/Y.</div></aside>
 <main id="vp"><canvas id="cv"></canvas><div id="tb">
 <button data-t="orbit" class="p" title="Orbit (O)">⟲ Orbit</button><button data-t="vtx" title="Vertex (V)">• Vertex</button><button data-t="draw" title="Draw (D)">✎ Draw</button><button data-t="face" title="Face (F)">▱ Face</button><button data-t="sel" title="Select (S)">⬚ Select</button><i class="sp"></i>
 <button data-g="translate" class="p" title="Move (W)">✥</button><button data-g="rotate" title="Rotate (E)">⟳</button><button data-g="scale" title="Scale (R)">⤢</button><i class="sp"></i>
@@ -271,6 +297,7 @@ html.sp-open,html.sp-open body{overflow:hidden}
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/exporters/GLTFExporter.js"></script>
 <script>
 const $=s=>document.querySelector(s),tri=m=>m.i.length/3;
+let lk={rt:0,src:0},hid={rt:0,src:0},UL=[],selL='rt',tgtId='src',psT=0,ulDirty=0;
 let src,cur,pend,hist=[],hi=-1,lods=[],busy=false,cancel=null,name='mesh',cmode='r',vmode='s',orthoS=2;
 const log=(m,c)=>{const d=document.createElement('div');d.textContent=new Date().toLocaleTimeString()+' '+m;if(c)d.style.color=c;$('#log').prepend(d)};
 const prog=v=>{$('#bar i').style.width=(v<0?0:v<=1?v*100:100)+'%'};
@@ -362,11 +389,11 @@ function vcol(m,mode){const {p,i}=m,n=p.length/3,S=new Float32Array(n*3),A=new F
 function build(m){mRes.geometry.dispose();const g=geo(m,vmode==='s'?null:vcol(m,vmode));mRes.geometry=g;mWire.geometry=g;mat.vertexColors=vmode!=='s';mat.needsUpdate=true;
  qLines.geometry.dispose();const L=[];if(m.q){for(let k=0;k<m.q.length;k+=4)for(let e=0;e<4;e++)L.push(m.q[k+e],m.q[k+(e+1)%4]);for(let k=0;k<m.qt.length;k+=3)for(let e=0;e<3;e++)L.push(m.qt[k+e],m.qt[k+(e+1)%3])}
  const lg=new THREE.BufferGeometry();lg.setAttribute('position',g.getAttribute('position'));lg.setIndex(L);qLines.geometry=lg;qLines.visible=!!m.q;applyVis()}
-function applyVis(){const w=$('#wf').checked,m=pend?pend.m:cur;mWire.visible=w&&!(m&&m.q);qLines.visible=w&&!!(m&&m.q);mat.side=smat.side=$('#bf').checked?THREE.DoubleSide:THREE.FrontSide;mat.needsUpdate=true}
+function applyVis(){const w=$('#wf').checked,m=pend?pend.m:cur;mWire.visible=w&&!(m&&m.q)&&!hid.src;qLines.visible=w&&!!(m&&m.q)&&!hid.src;mat.side=smat.side=$('#bf').checked?THREE.DoubleSide:THREE.FrontSide;mat.needsUpdate=true}
 function setAsp(a){persp.aspect=a;persp.updateProjectionMatrix();ortho.left=-orthoS*a;ortho.right=orthoS*a;ortho.top=orthoS;ortho.bottom=-orthoS;ortho.updateProjectionMatrix()}
 function size(){const r=$('#vp').getBoundingClientRect();R.setPixelRatio(Math.min(devicePixelRatio,2));R.setSize(r.width,r.height,false)}
 addEventListener('resize',size);size();
-function vis(r,s,o){mRes.visible=r;mSrc.visible=s;mSrcW.visible=o&&!!src;if(!r){mWire.visible=false;qLines.visible=false}else applyVis()}
+function vis(r,s,o){mRes.visible=r&&!hid.src;mSrc.visible=s&&!hid.src;mSrcW.visible=o&&!!src&&!hid.src;if(!r){mWire.visible=false;qLines.visible=false}else applyVis()}
 function draw(){requestAnimationFrame(draw);ctl.update();const w=R.domElement.width,h=R.domElement.height;if(!w)return;
  if(cmode==='x'){setAsp(w/2/h);vis(false,true,false);R.setViewport(0,0,w/2,h);R.setScissor(0,0,w/2,h);R.render(sc,cam);vis(true,false,false);R.setViewport(w/2,0,w/2,h);R.setScissor(w/2,0,w/2,h);R.render(sc,cam)}
  else{setAsp(w/h);vis(cmode!=='s',cmode==='s',cmode==='o');R.setViewport(0,0,w,h);R.setScissor(0,0,w,h);R.render(sc,cam)}}
@@ -383,9 +410,9 @@ function list(){const it=(l,m,a)=>'<div class="it'+(a?' a':'')+'" data-k="'+l+'"
 $('#al').onclick=e=>{const k=e.target.closest('.it')?.dataset.k;if(!k||busy)return;const m=k==='Source'?src:k==='Current'?cur:lods[+k.slice(3)-1];if(m!==cur){pend={m,label:k};showM(m);$('#pt').textContent='Preview of '+k;$('#pend').hidden=false}};
 function commit(m,label){hist=hist.slice(0,hi+1);hist.push({m,label});if(hist.length>25)hist.shift();hi=hist.length-1;cur=m;pend=null;$('#pend').hidden=true;showM(cur);log('applied: '+label);save()}
 function setNew(m,nm){src=m;name=nm;lods=[];hist=[];hi=-1;fit(m);commit(m,'import '+nm);const d=diag(m);log(nm+': '+d.V+' verts, '+d.F+' tris','var(--ac)')}
-async function run(label,fnc){if(busy||!cur)return;busy=true;prog(.02);log(label+'…');const t=performance.now();try{const r=fin(await fnc(cur));pend={m:r,label};showM(r);$('#pt').textContent=label+' preview: '+tri(r)+' tris (was '+tri(cur)+'). Apply to keep.';$('#pend').hidden=false;log(label+' done in '+Math.round(performance.now()-t)+' ms (preview)','var(--ac)')}catch(e){log(label+' stopped: '+(e&&e.message||e),'var(--er)');if(pend==null&&cur)showM(cur)}busy=false;cancel=null;prog(-1)}
-$('#ap').onclick=()=>{if(pend)commit(pend.m,pend.label)};$('#ds').onclick=()=>{pend=null;$('#pend').hidden=true;cur&&showM(cur)};
-$('#un').onclick=()=>{if(hi>0){cur=hist[--hi].m;pend=null;$('#pend').hidden=true;showM(cur);log('undo')}};$('#re').onclick=()=>{if(hi<hist.length-1){cur=hist[++hi].m;pend=null;$('#pend').hidden=true;showM(cur);log('redo')}};
+async function run(label,fnc){if(busy||!cur)return;if(lk.src)return lockMsg('src');busy=true;prog(.02);log(label+'…');const t=performance.now();try{const r=fin(await fnc(cur));pend={m:r,label};showM(r);$('#pt').textContent=label+' preview: '+tri(r)+' tris (was '+tri(cur)+'). Apply to keep.';$('#pend').hidden=false;log(label+' done in '+Math.round(performance.now()-t)+' ms (preview)','var(--ac)')}catch(e){log(label+' stopped: '+(e&&e.message||e),'var(--er)');if(pend==null&&cur)showM(cur)}busy=false;cancel=null;prog(-1)}
+$('#ap').onclick=()=>{if(pend){if(lk.src)return lockMsg('src');commit(pend.m,pend.label)}};$('#ds').onclick=()=>{pend=null;$('#pend').hidden=true;cur&&showM(cur)};
+$('#un').onclick=()=>{if(lk.src)return lockMsg('src');if(hi>0){cur=hist[--hi].m;pend=null;$('#pend').hidden=true;showM(cur);log('undo')}};$('#re').onclick=()=>{if(lk.src)return lockMsg('src');if(hi<hist.length-1){cur=hist[++hi].m;pend=null;$('#pend').hidden=true;showM(cur);log('redo')}};
 $('#cn').onclick=()=>{cancel&&cancel()};
 $('#hb').onclick=()=>run('Heal',async m=>{await new Promise(r=>setTimeout(r,20));const r=heal(m,{weld:$('#h1').checked,deg:$('#h2').checked,frag:$('#h3').checked,holes:$('#h4').checked,wind:$('#h5').checked,eps:Math.pow(10,-$('#ht').value)});return r});
 $('#dp').oninput=e=>$('#dv').textContent=e.target.value;
@@ -402,11 +429,11 @@ function ingest(obj,nm,top){const parts=[];obj.updateMatrixWorld(true);skel=null
  for(const x of parts){a.set(x.P,3*o);if(x.U){uv.set(x.U,2*o);hu=1}if(x.J&&x.W){cj.set(x.J,4*o);cw.set(x.W,4*o);hs=1}o+=x.P.length/3}
  uvTop=!!top;setNew(weld(a,Math.max(diagLen(a)*1e-6,1e-12),{uv:hu?uv:null,cj,cw:hs?cw:null}),nm)}
 $('#imp').onclick=()=>$('#file').click();
-$('#file').onchange=async e=>{const f=e.target.files[0];if(!f)return;const x=f.name.split('.').pop().toLowerCase();try{log('importing '+f.name+'…');
+$('#file').onchange=async e=>{const f=e.target.files[0];if(!f)return;if(lk.src){e.target.value='';return lockMsg('src')}const x=f.name.split('.').pop().toLowerCase();try{log('importing '+f.name+'…');
  if(x==='glb'||x==='gltf')new THREE.GLTFLoader().parse(await f.arrayBuffer(),'',g=>{try{ingest(g.scene,f.name,true)}catch(er){log('import failed: '+er.message,'var(--er)')}},er=>log('import failed: '+(er.message||er),'var(--er)'));
  else if(x==='obj')ingest(new THREE.OBJLoader().parse(await f.text()),f.name);
  else if(x==='stl'||x==='ply'){const g=(x==='stl'?new THREE.STLLoader():new THREE.PLYLoader()).parse(await f.arrayBuffer());ingest(new THREE.Mesh(g),f.name)}else throw new Error('unsupported format')}catch(er){log('import failed: '+er.message,'var(--er)')}e.target.value=''};
-$('#smp').onclick=()=>{let g=new THREE.TorusKnotGeometry(1,.3,220,36).toNonIndexed();const p=g.getAttribute('position').array,F=p.length/9,keep=[];const noise=(x,y,z)=>Math.sin(x*37)*Math.cos(y*41)*Math.sin(z*29)*.006;
+$('#smp').onclick=()=>{if(lk.src)return lockMsg('src');let g=new THREE.TorusKnotGeometry(1,.3,220,36).toNonIndexed();const p=g.getAttribute('position').array,F=p.length/9,keep=[];const noise=(x,y,z)=>Math.sin(x*37)*Math.cos(y*41)*Math.sin(z*29)*.006;
  for(let t=0;t<F;t++){if(t%997===3||t%1499===7)continue;for(let k=0;k<9;k++)keep.push(p[9*t+k])}const a=Float32Array.from(keep);for(let k=0;k<a.length;k+=3){const s=noise(a[k],a[k+1],a[k+2]);a[k]+=s;a[k+1]+=s;a[k+2]+=s}
  const w=weld(a,1e-4);setNew(w,'noisy-torus-knot (with holes)')};
 function dl_(b,n){const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=n;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),4000)}
@@ -421,7 +448,7 @@ $('#eg').onclick=()=>{if(!cur)return;let g=geo(cur),J=cur.sj,W=cur.sw;const sk=s
  new THREE.GLTFExporter().parse(out,r=>{dl_(new Blob([r],{type:'model/gltf-binary'}),'exo-retopo.glb');log('GLB exported'+(sk?' with skeleton + weights (rest pose)':' (triangulated)'),'var(--ac)')},{binary:true})};
 const idb=()=>new Promise((r,j)=>{const q=indexedDB.open('exo-remesher',1);q.onupgradeneeded=()=>q.result.createObjectStore('s');q.onsuccess=()=>r(q.result);q.onerror=()=>j(q.error)});
 async function save(){try{const d=await idb();d.transaction('s','readwrite').objectStore('s').put({cur,src,name,uvTop},'k')}catch(e){}}
-$('#rc').onclick=async()=>{try{const d=await idb(),q=d.transaction('s').objectStore('s').get('k');q.onsuccess=()=>{const v=q.result;if(!v)return log('nothing to recover','var(--wr)');src=v.src;name=v.name;uvTop=!!v.uvTop;lods=[];hist=[];hi=-1;fit(v.cur);commit(v.cur,'recovered project');log('recovered autosave','var(--ac)')}}catch(e){log('recovery failed','var(--er)')}};
+$('#rc').onclick=async()=>{if(lk.src)return lockMsg('src');try{const d=await idb(),q=d.transaction('s').objectStore('s').get('k');q.onsuccess=()=>{const v=q.result;if(!v)return log('nothing to recover','var(--wr)');src=v.src;name=v.name;uvTop=!!v.uvTop;lods=[];hist=[];hi=-1;fit(v.cur);commit(v.cur,'recovered project');log('recovered autosave','var(--ac)');restoreLayers()}}catch(e){log('recovery failed','var(--er)')}};
 // ---------- spatial index + attribute transfer ----------
 let G_,uvTop=false;const grd=()=>G_&&G_.m===src?G_:(G_=mkGrid(src));
 function mkGrid(m){const {p,i}=m,F=i.length/3,bb=new THREE.Box3().setFromArray(p),c=Math.max(diagLen(p)/Math.max(6,Math.min(80,Math.cbrt(F)*1.5)),1e-9),G=new Map(),key=(x,y,z)=>x+','+y+','+z,ce=(v,a)=>Math.floor((v-bb.min.getComponent(a))/c),
@@ -507,30 +534,33 @@ rtP.renderOrder=rtL.renderOrder=rtF.renderOrder=9;rtP.frustumCulled=rtL.frustumC
 const cv=$('#cv'),RC=new THREE.Raycaster(),V3=new THREE.Vector3(),ek=(a,b)=>Math.min(a,b)+','+Math.max(a,b);
 function edges(){const E=new Map(),add=(a,b)=>{const k=ek(a,b);if(!E.has(k))E.set(k,[a,b])};rt.f.forEach(f=>f.forEach((v,k)=>add(v,f[(k+1)%f.length])));rt.le.forEach(e=>add(e[0],e[1]));return E}
 function selV(){const s=new Set();if(sm==='v')sel.forEach(v=>s.add(v));else if(sm==='e')sel.forEach(k=>k.split(',').forEach(v=>s.add(+v)));else sel.forEach(f=>rt.f[f]&&rt.f[f].forEach(v=>s.add(v)));return s}
-function rtDraw(){const n=rt.p.length/3,sv=selV(),C=new Float32Array(n*3),cl=new THREE.Color();for(let v=0;v<n;v++){cl.set(sv.has(v)?0xffb454:pf.includes(v)?0xffffff:0xc6ff3d);C.set([cl.r,cl.g,cl.b],3*v)}
+function rtDraw(){const n=rt.p.length/3,sv=selV(),C=new Float32Array(n*3),cl=new THREE.Color();for(let v=0;v<n;v++){cl.set(sv.has(v)?0xffb454:pf.includes(v)?0xffffff:RB());C.set([cl.r,cl.g,cl.b],3*v)}
  rtP.geometry.dispose();rtP.geometry=new THREE.BufferGeometry().setAttribute('position',new THREE.BufferAttribute(Float32Array.from(rt.p),3)).setAttribute('color',new THREE.BufferAttribute(C,3));
- const E=[...edges()],LP=new Float32Array(E.length*6),LC=new Float32Array(E.length*6);E.forEach(([k,[a,b]],j)=>{LP.set(rt.p.slice(3*a,3*a+3),6*j);LP.set(rt.p.slice(3*b,3*b+3),6*j+3);cl.set(sm==='e'&&sel.has(k)?0xffb454:0xc6ff3d);for(let q=0;q<2;q++)LC.set([cl.r,cl.g,cl.b],6*j+3*q)});
+ const E=[...edges()],LP=new Float32Array(E.length*6),LC=new Float32Array(E.length*6);E.forEach(([k,[a,b]],j)=>{LP.set(rt.p.slice(3*a,3*a+3),6*j);LP.set(rt.p.slice(3*b,3*b+3),6*j+3);cl.set(sm==='e'&&sel.has(k)?0xffb454:RB());for(let q=0;q<2;q++)LC.set([cl.r,cl.g,cl.b],6*j+3*q)});
  rtL.geometry.dispose();rtL.geometry=new THREE.BufferGeometry().setAttribute('position',new THREE.BufferAttribute(LP,3)).setAttribute('color',new THREE.BufferAttribute(LC,3));
- const T=[],TC=[];rt.f.forEach((f,k)=>{cl.set(sm==='f'&&sel.has(k)?0xffb454:0xc6ff3d);for(const tr of f.length===3?[[0,1,2]]:[[0,1,2],[0,2,3]])for(const q of tr){T.push(...rt.p.slice(3*f[q],3*f[q]+3));TC.push(cl.r,cl.g,cl.b)}});
- rtF.geometry.dispose();rtF.geometry=new THREE.BufferGeometry().setAttribute('position',new THREE.Float32BufferAttribute(T,3)).setAttribute('color',new THREE.Float32BufferAttribute(TC,3));$('#rst').textContent=n+' v / '+E.length+' e / '+rt.f.length+' f'}
-function tcAttach(){if(!tc)return;const sv=selV();if(tool!=='sel'||!sv.size||cmode==='x'){tc.detach();return}let x=0,y=0,z=0;sv.forEach(v=>{x+=rt.p[3*v];y+=rt.p[3*v+1];z+=rt.p[3*v+2]});const n=sv.size;pivot.position.set(x/n,y/n,z/n);pivot.rotation.set(0,0,0);pivot.scale.set(1,1,1);pivot.updateMatrixWorld();tc.attach(pivot);tc.setMode(gm)}
-const refresh=()=>{rtDraw();tcAttach()},snap=()=>{stack.push(JSON.stringify(rt));rstk.length=0;if(stack.length>30)stack.shift()};
-function mkT(){if(tc){sc.remove(tc);tc.dispose()}tc=new THREE.TransformControls(cam,R.domElement);tc.addEventListener('dragging-changed',e=>{ctl.enabled=!e.value;if(e.value){snap();pivot.updateMatrixWorld();inv.copy(pivot.matrixWorld).invert();base=[...selV()].map(v=>[v,rt.p.slice(3*v,3*v+3)])}else{if($('#kss').checked){const G=grd();for(const [v] of base){const r=G.find(rt.p[3*v],rt.p[3*v+1],rt.p[3*v+2]);rt.p[3*v]=r.x;rt.p[3*v+1]=r.y;rt.p[3*v+2]=r.z}}refresh()}});
+ const T=[],TC=[];rt.f.forEach((f,k)=>{cl.set(sm==='f'&&sel.has(k)?0xffb454:RB());for(const tr of f.length===3?[[0,1,2]]:[[0,1,2],[0,2,3]])for(const q of tr){T.push(...rt.p.slice(3*f[q],3*f[q]+3));TC.push(cl.r,cl.g,cl.b)}});
+ rtF.geometry.dispose();rtF.geometry=new THREE.BufferGeometry().setAttribute('position',new THREE.Float32BufferAttribute(T,3)).setAttribute('color',new THREE.Float32BufferAttribute(TC,3));$('#rst').textContent=n+' v / '+E.length+' e / '+rt.f.length+' f · snap: '+tgtName()+(lk.rt?' · locked':'')}
+function tcAttach(){if(!tc)return;const sv=selV();if(tool!=='sel'||!sv.size||cmode==='x'||lk.rt){tc.detach();return}let x=0,y=0,z=0;sv.forEach(v=>{x+=rt.p[3*v];y+=rt.p[3*v+1];z+=rt.p[3*v+2]});const n=sv.size;pivot.position.set(x/n,y/n,z/n);pivot.rotation.set(0,0,0);pivot.scale.set(1,1,1);pivot.updateMatrixWorld();tc.attach(pivot);tc.setMode(gm)}
+const refresh=()=>{rtDraw();tcAttach();persist()},snap=()=>{stack.push(JSON.stringify(rt));rstk.length=0;if(stack.length>30)stack.shift()};
+function mkT(){if(tc){sc.remove(tc);tc.dispose()}tc=new THREE.TransformControls(cam,R.domElement);tc.addEventListener('dragging-changed',e=>{ctl.enabled=!e.value;if(e.value){snap();pivot.updateMatrixWorld();inv.copy(pivot.matrixWorld).invert();base=[...selV()].map(v=>[v,rt.p.slice(3*v,3*v+3)])}else{if($('#kss').checked){const G=sgrid();for(const [v] of base){const r=G.find(rt.p[3*v],rt.p[3*v+1],rt.p[3*v+2]);rt.p[3*v]=r.x;rt.p[3*v+1]=r.y;rt.p[3*v+2]=r.z}}refresh()}});
  tc.addEventListener('objectChange',()=>{pivot.updateMatrixWorld();const M=pivot.matrixWorld.clone().multiply(inv);for(const [v,pp] of base){V3.set(pp[0],pp[1],pp[2]).applyMatrix4(M);rt.p[3*v]=V3.x;rt.p[3*v+1]=V3.y;rt.p[3*v+2]=V3.z}rtDraw()});sc.add(tc);tcAttach()}
 function ndc(e){const r=cv.getBoundingClientRect();return[(e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1,r]}
-function hit(e){const[x,y]=ndc(e);RC.setFromCamera({x,y},cam);const m=cmode==='s'?src:(pend?pend.m:cur);if(!m)return null;if(!RG||RG.m!==m)RG=mkGrid(m);const r=RG.ray(RC.ray);return r&&r.p}
+function hit(e){const[x,y]=ndc(e);RC.setFromCamera({x,y},cam);const T=tgtL();
+ if(T&&T.k==='img'){const h=planeHit(T,RC.ray);if(!h)return null;if($('#kss').checked&&src){const q=throughProj(h.p,h.n);if(q)return q;const c=grd().find(h.p.x,h.p.y,h.p.z);return new THREE.Vector3(c.x,c.y,c.z)}return h.p}
+ if(T&&T.k==='mesh'){const r=ulGrid(T).ray(RC.ray);return r&&r.p}
+const m=cmode==='s'?src:(pend?pend.m:cur);if(!m)return null;if(!RG||RG.m!==m)RG=mkGrid(m);const r=RG.ray(RC.ray);return r&&r.p}
 function scr(a,r){V3.set(rt.p[3*a],rt.p[3*a+1],rt.p[3*a+2]).project(cam);return[(V3.x+1)/2*r.width,(1-V3.y)/2*r.height]}
 function near(e){const[,,r]=ndc(e),mx=e.clientX-r.left,my=e.clientY-r.top;let b=-1,bd=14;for(let v=0;v<rt.p.length/3;v++){const[x,y]=scr(v,r),d=Math.hypot(x-mx,y-my);if(d<bd){bd=d;b=v}}return b}
 function pickSel(e){const[,,r]=ndc(e),mx=e.clientX-r.left,my=e.clientY-r.top;let best=null,bd=sm==='f'?40:14;if(sm==='v'){const v=near(e);return v<0?null:v}
  if(sm==='e'){for(const [k,[a,b]] of edges()){const[x1,y1]=scr(a,r),[x2,y2]=scr(b,r),dx=x2-x1,dy=y2-y1,t=Math.max(0,Math.min(1,((mx-x1)*dx+(my-y1)*dy)/(dx*dx+dy*dy||1))),d=Math.hypot(x1+t*dx-mx,y1+t*dy-my);if(d<bd){bd=d;best=k}}return best}
  rt.f.forEach((f,k)=>{let sx=0,sy=0;f.forEach(v=>{const[x,y]=scr(v,r);sx+=x/f.length;sy+=y/f.length});const d=Math.hypot(sx-mx,sy-my);if(d<bd){bd=d;best=k}});return best}
-function makeFace(){if(pf.length<3)return;snap();const f=[...pf],P=rt.p;let cx=0,cy=0,cz=0;f.forEach(v=>{cx+=P[3*v]/f.length;cy+=P[3*v+1]/f.length;cz+=P[3*v+2]/f.length});const r=grd().find(cx,cy,cz),a=fn(P,f[0],f[1],f[2]),b=fn(src.p,src.i[3*r.t],src.i[3*r.t+1],src.i[3*r.t+2]);if(a[0]*b[0]+a[1]*b[1]+a[2]*b[2]<0)f.reverse();rt.f.push(f);pf=[];sel.clear();refresh()}
-function delSel(){if(!sel.size)return;snap();
+function makeFace(){if(pf.length<3)return;if(lk.rt)return lockMsg('rt');snap();const f=[...pf],P=rt.p;let cx=0,cy=0,cz=0;f.forEach(v=>{cx+=P[3*v]/f.length;cy+=P[3*v+1]/f.length;cz+=P[3*v+2]/f.length});const a=fn(P,f[0],f[1],f[2]),b=surfN(cx,cy,cz);if(a[0]*b[0]+a[1]*b[1]+a[2]*b[2]<0)f.reverse();rt.f.push(f);pf=[];sel.clear();refresh()}
+function delSel(){if(!sel.size)return;if(lk.rt)return lockMsg('rt');snap();
  if(sm==='f')rt.f=rt.f.filter((_,k)=>!sel.has(k));
  else if(sm==='e'){rt.le=rt.le.filter(e=>!sel.has(ek(e[0],e[1])));rt.f=rt.f.filter(f=>!f.some((v,k)=>sel.has(ek(v,f[(k+1)%f.length]))))}
  else{const n=rt.p.length/3,mp=new Int32Array(n),P=[];for(let v=0;v<n;v++){if(sel.has(v))mp[v]=-1;else{mp[v]=P.length/3;P.push(rt.p[3*v],rt.p[3*v+1],rt.p[3*v+2])}}rt.p=P;rt.f=rt.f.filter(f=>f.every(v=>mp[v]>=0)).map(f=>f.map(v=>mp[v]));rt.le=rt.le.filter(e=>e.every(v=>mp[v]>=0)).map(e=>e.map(v=>mp[v]))}
  sel.clear();pf=[];refresh()}
-cv.addEventListener('pointerdown',e=>{if(tool==='orbit'||e.button!==0||(tc&&tc.axis))return;if(cmode==='x'||!cur)return log('tools need a single view (not Split) and a loaded mesh','var(--wr)');ctl.enabled=false;down=true;
+cv.addEventListener('pointerdown',e=>{if(tool==='orbit'||e.button!==0||(tc&&tc.axis))return;if(cmode==='x'||!cur)return log('tools need a single view (not Split) and a loaded mesh','var(--wr)');if(lk.rt)return lockMsg('rt');ctl.enabled=false;down=true;
  if(tool==='sel'){const k=pickSel(e);if(!e.shiftKey)sel.clear();if(k!==null)sel.has(k)?sel.delete(k):sel.add(k);refresh();return}
  if(tool==='face'){let v=near(e);if(v<0){const pt=hit(e);if(!pt)return;snap();rt.p.push(pt.x,pt.y,pt.z);v=rt.p.length/3-1}if(!pf.includes(v))pf.push(v);if(pf.length===4)makeFace();else rtDraw();return}
  const h=$('#ksv').checked?near(e):-1;let v=h;if(v<0){const pt=hit(e);if(!pt)return;snap();rt.p.push(pt.x,pt.y,pt.z);v=rt.p.length/3-1}if(tool==='draw')stroke=v;rtDraw()},true);
@@ -538,10 +568,10 @@ cv.addEventListener('pointermove',e=>{if(!down||tool!=='draw'||stroke===null||e.
 addEventListener('pointerup',()=>{if(down){down=false;stroke=null;ctl.enabled=true;refresh()}});
 addEventListener('keydown',e=>{if(/INPUT|SELECT/.test(e.target.tagName))return;if(e.key==='Enter')makeFace();else if(e.key==='Delete'||e.key==='Backspace')delSel();else if(e.key==='Escape'){pf=[];sel.clear();refresh()}});
 $('#smd').onchange=e=>setS(e.target.value);$('#gmd').onchange=e=>setG(e.target.value);
-$('#bmf').onclick=makeFace;$('#bdl').onclick=delSel;$('#bcl').onclick=()=>{snap();rt.p=[];rt.f=[];rt.le=[];sel.clear();pf=[];refresh()};
+$('#bmf').onclick=makeFace;$('#bdl').onclick=delSel;$('#bcl').onclick=()=>{if(lk.rt)return lockMsg('rt');snap();rt.p=[];rt.f=[];rt.le=[];sel.clear();pf=[];refresh()};
 $('#bru').onclick=()=>undoR();
-$('#brp').onclick=()=>{if(!cur)return;snap();const G=grd();for(let v=0;v<rt.p.length/3;v++){const r=G.find(rt.p[3*v],rt.p[3*v+1],rt.p[3*v+2]);rt.p[3*v]=r.x;rt.p[3*v+1]=r.y;rt.p[3*v+2]=r.z}refresh();log('retopo verts reprojected to source')};
-$('#bcm').onclick=()=>{if(!rt.f.length||!cur)return log('retopo has no faces','var(--wr)');const I=[],Q=[],T=[];rt.f.forEach(f=>{if(f.length===4){Q.push(...f);I.push(f[0],f[1],f[2],f[0],f[2],f[3])}else{T.push(...f);I.push(...f)}});
+$('#brp').onclick=()=>{if(!cur)return;if(lk.rt)return lockMsg('rt');snap();const G=sgrid();for(let v=0;v<rt.p.length/3;v++){const r=G.find(rt.p[3*v],rt.p[3*v+1],rt.p[3*v+2]);rt.p[3*v]=r.x;rt.p[3*v+1]=r.y;rt.p[3*v+2]=r.z}refresh();log('retopo verts reprojected to source')};
+$('#bcm').onclick=()=>{if(lk.src)return lockMsg('src');if(!rt.f.length||!cur)return log('retopo has no faces','var(--wr)');const I=[],Q=[],T=[];rt.f.forEach(f=>{if(f.length===4){Q.push(...f);I.push(f[0],f[1],f[2],f[0],f[2],f[3])}else{T.push(...f);I.push(...f)}});
  const m=fin({p:Float32Array.from(rt.p),i:Uint32Array.from(I),q:Uint32Array.from(Q),qt:Uint32Array.from(T)});pend={m,label:'retopo mesh'};showM(m);$('#pt').textContent='Retopo mesh preview: '+tri(m)+' tris. Apply to keep.';$('#pend').hidden=false};
 // ---------- remesh / winding / bake hooks ----------
 $('#wb').onclick=()=>run('Winding repair',async m=>fixWind(m));
@@ -570,28 +600,104 @@ function fieldAl(m){const {p,i}=m,n=p.length/3,{nb}=adj(i,n),N=new Float32Array(
  for(let it=0;it<20;it++){const D2=new Float32Array(n*3);for(let v=0;v<n;v++){let re=0,im=0;for(const u of [v,v,...nb[v]]){let wx=D[3*u],wy=D[3*u+1],wz=D[3*u+2];const dn=wx*N[3*v]+wy*N[3*v+1]+wz*N[3*v+2];wx-=dn*N[3*v];wy-=dn*N[3*v+1];wz-=dn*N[3*v+2];if(wx*wx+wy*wy+wz*wz<1e-8)continue;const an=ang(v,wx,wy,wz);re+=Math.cos(4*an);im+=Math.sin(4*an)}setD(D2,v,Math.atan2(im,re)/4)}D=D2}
  const c4=(v,ex,ey,ez)=>{const dn=ex*N[3*v]+ey*N[3*v+1]+ez*N[3*v+2];ex-=dn*N[3*v];ey-=dn*N[3*v+1];ez-=dn*N[3*v+2];const l=Math.hypot(ex,ey,ez)||1,c=(ex*D[3*v]+ey*D[3*v+1]+ez*D[3*v+2])/l,c2=c*c;return 8*c2*c2-8*c2+1};
  return(u,v)=>{const ex=p[3*v]-p[3*u],ey=p[3*v+1]-p[3*u+1],ez=p[3*v+2]-p[3*u+2];return(1-(c4(u,ex,ey,ez)+c4(v,ex,ey,ez))/2)/2}}
-function addF(f){const P=rt.p;let cx=0,cy=0,cz=0;f.forEach(v=>{cx+=P[3*v]/f.length;cy+=P[3*v+1]/f.length;cz+=P[3*v+2]/f.length});const r=grd().find(cx,cy,cz),a=fn(P,f[0],f[1],f[2]),b=fn(src.p,src.i[3*r.t],src.i[3*r.t+1],src.i[3*r.t+2]);if(a[0]*b[0]+a[1]*b[1]+a[2]*b[2]<0)f.reverse();rt.f.push(f)}
+function addF(f){const P=rt.p;let cx=0,cy=0,cz=0;f.forEach(v=>{cx+=P[3*v]/f.length;cy+=P[3*v+1]/f.length;cz+=P[3*v+2]/f.length});const a=fn(P,f[0],f[1],f[2]),b=surfN(cx,cy,cz);if(a[0]*b[0]+a[1]*b[1]+a[2]*b[2]<0)f.reverse();rt.f.push(f)}
 function chains(keys){const A=new Map(),add=(a,b)=>{if(!A.has(a))A.set(a,[]);A.get(a).push(b)};keys.forEach(k=>{const[a,b]=k.split(',').map(Number);add(a,b);add(b,a)});const seen=new Set(),out=[],st=[...A.keys()].sort((x,y)=>(A.get(x).length===1?0:1)-(A.get(y).length===1?0:1));
  for(const s of st){if(seen.has(s))continue;const L=[s];seen.add(s);let v=s;for(;;){const nx=A.get(v).find(u=>!seen.has(u));if(nx===undefined)break;L.push(nx);seen.add(nx);v=nx}out.push({v:L,cyc:A.get(s).length===2})}return out}
-function bridge(){if(sm!=='e'||sel.size<2)return log('Bridge: Edge mode, select two edge chains','var(--wr)');const C=chains([...sel]);if(C.length!==2||C[0].v.length!==C[1].v.length)return log('Bridge needs 2 chains with equal edge counts','var(--wr)');
+function bridge(){if(lk.rt)return lockMsg('rt');if(sm!=='e'||sel.size<2)return log('Bridge: Edge mode, select two edge chains','var(--wr)');const C=chains([...sel]);if(C.length!==2||C[0].v.length!==C[1].v.length)return log('Bridge needs 2 chains with equal edge counts','var(--wr)');
  const[A,B]=C,n=A.v.length,cyc=A.cyc&&B.cyc,d=(a,b)=>Math.hypot(rt.p[3*a]-rt.p[3*b],rt.p[3*a+1]-rt.p[3*b+1],rt.p[3*a+2]-rt.p[3*b+2]),bi=(k,r,s)=>r?(n-1-k+s+n)%n:(k+s)%n;let best=[1e30,0,0];
  for(let r=0;r<2;r++)for(let s=0;s<(cyc?n:1);s++){let c=0;for(let k=0;k<n;k++)c+=d(A.v[k],B.v[bi(k,r,s)]);if(c<best[0])best=[c,r,s]}
  snap();for(let k=0;k<(cyc?n:n-1);k++){const k2=(k+1)%n;addF([A.v[k],A.v[k2],B.v[bi(k2,best[1],best[2])],B.v[bi(k,best[1],best[2])]])}sel.clear();refresh();log('bridged '+(cyc?n:n-1)+' quads')}
-function loopIns(){if(sm!=='e'||sel.size!==1)return log('Loop: Edge mode, select one edge','var(--wr)');const EF=new Map();rt.f.forEach((f,fi)=>f.length===4&&f.forEach((v,k)=>{const e=ek(v,f[(k+1)%4]);if(!EF.has(e))EF.set(e,[]);EF.get(e).push(fi)}));
+function loopIns(){if(lk.rt)return lockMsg('rt');if(sm!=='e'||sel.size!==1)return log('Loop: Edge mode, select one edge','var(--wr)');const EF=new Map();rt.f.forEach((f,fi)=>f.length===4&&f.forEach((v,k)=>{const e=ek(v,f[(k+1)%4]);if(!EF.has(e))EF.set(e,[]);EF.get(e).push(fi)}));
  const e0=[...sel][0],R=new Set([e0]),FS=new Set(),Q=[e0];while(Q.length){const e=Q.pop();for(const fi of EF.get(e)||[]){FS.add(fi);const f=rt.f[fi];for(let k=0;k<4;k++)if(ek(f[k],f[(k+1)%4])===e){const o=ek(f[(k+2)%4],f[(k+3)%4]);if(!R.has(o)){R.add(o);Q.push(o)}}}}
- if(!FS.size)return log('no quad ring through that edge','var(--wr)');snap();const mid=new Map(),G=grd(),mv=e=>{let v=mid.get(e);if(v===undefined){const[a,b]=e.split(',').map(Number);let x=(rt.p[3*a]+rt.p[3*b])/2,y=(rt.p[3*a+1]+rt.p[3*b+1])/2,z=(rt.p[3*a+2]+rt.p[3*b+2])/2;if($('#kss').checked){const r=G.find(x,y,z);x=r.x;y=r.y;z=r.z}v=rt.p.length/3;rt.p.push(x,y,z);mid.set(e,v)}return v};
+ if(!FS.size)return log('no quad ring through that edge','var(--wr)');snap();const mid=new Map(),G=sgrid(),mv=e=>{let v=mid.get(e);if(v===undefined){const[a,b]=e.split(',').map(Number);let x=(rt.p[3*a]+rt.p[3*b])/2,y=(rt.p[3*a+1]+rt.p[3*b+1])/2,z=(rt.p[3*a+2]+rt.p[3*b+2])/2;if($('#kss').checked){const r=G.find(x,y,z);x=r.x;y=r.y;z=r.z}v=rt.p.length/3;rt.p.push(x,y,z);mid.set(e,v)}return v};
  const keep=[],add=[];rt.f.forEach((f,fi)=>{if(!FS.has(fi)){keep.push(f);return}let k=0;for(;k<4;k++)if(R.has(ek(f[k],f[(k+1)%4])))break;const[a,b,c,d]=[0,1,2,3].map(j=>f[(k+j)%4]),m1=mv(ek(a,b)),m2=mv(ek(c,d));add.push([a,m1,m2,d],[m1,b,c,m2])});
  rt.f=keep.concat(add);sel.clear();refresh();log('loop inserted: '+mid.size+' edges split')}
-function undoR(){const s=stack.pop();if(s){rstk.push(JSON.stringify(rt));Object.assign(rt,JSON.parse(s));sel.clear();pf=[];refresh()}}
-function redoR(){const s=rstk.pop();if(s){stack.push(JSON.stringify(rt));Object.assign(rt,JSON.parse(s));sel.clear();pf=[];refresh()}}
+function undoR(){if(lk.rt)return lockMsg('rt');const s=stack.pop();if(s){rstk.push(JSON.stringify(rt));Object.assign(rt,JSON.parse(s));sel.clear();pf=[];refresh()}}
+function redoR(){if(lk.rt)return lockMsg('rt');const s=rstk.pop();if(s){stack.push(JSON.stringify(rt));Object.assign(rt,JSON.parse(s));sel.clear();pf=[];refresh()}}
 const tg=(a,v)=>document.querySelectorAll('['+a+']').forEach(b=>b.classList.toggle('p',b.getAttribute(a)===v));
 function setTool(t){tool=t;tg('data-t',t);ctl.enabled=true;pf=[];refresh()}
 function setG(g){gm=g;tg('data-g',g);$('#gmd').value=g;tc&&tc.setMode(g)}
 function setS(v){sm=v;sel.clear();tg('data-s',v);$('#smd').value=v;refresh()}
 document.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;const d=b.dataset;if(d.t)setTool(d.t);if(d.g)setG(d.g);if(d.s)setS(d.s);const A={mf:makeFace,del:delSel,rp:()=>$('#brp').click(),un:undoR,rd:redoR,loop:loopIns,bridge}[d.a];A&&A()});
 addEventListener('keydown',e=>{if(/INPUT|SELECT/.test(e.target.tagName))return;const k=e.key.toLowerCase(),c=e.ctrlKey||e.metaKey;if(c&&k==='z'){e.preventDefault();undoR()}else if(c&&k==='y'){e.preventDefault();redoR()}else if(!c){const T={o:'orbit',v:'vtx',d:'draw',f:'face',s:'sel'}[k],G={w:'translate',e:'rotate',r:'scale'}[k],S={1:'v',2:'e',3:'f'}[k];T?setTool(T):G?setG(G):S&&setS(S)}});
+// ---------- layers, underlays, locks ----------
+// Layers: built-in "Retopo sketch" (rt) and "Surface (source)" (src), plus imported underlays:
+//   mesh  = surface-form reference (can be the snap target)   img = sketch image on a plane (traced, then projected onto the source)
+const ulG=new THREE.Group();sc.add(ulG);
+const lyEsc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function lockMsg(k){log((k==='rt'?'Retopo sketch':'Source surface')+' layer is locked: unlock it under Layers to edit','var(--wr)');return false}
+function RB(){return lk.rt?0x77805a:0xc6ff3d}
+function tgtL(){return tgtId==='src'?null:UL.find(l=>l.id===tgtId)||null}
+function tgtName(){const t=tgtL();return t?t.name:'source'}
+function sgrid(){const t=tgtL();return t&&t.k==='mesh'?ulGrid(t):grd()}
+function surfN(x,y,z){const g=sgrid(),r=g.find(x,y,z),A=g.tri(r.t),n=new THREE.Vector3().subVectors(A[1],A[0]).cross(new THREE.Vector3().subVectors(A[2],A[0])).normalize();return[n.x,n.y,n.z]}
+function ulGrid(l){if(l.G&&l.G.v===l.ver)return l.G.g;l.obj.updateMatrixWorld(true);const M=l.obj.matrixWorld,P=l.m.p,w=new Float32Array(P.length),v=new THREE.Vector3();
+ for(let k=0;k<P.length;k+=3){v.set(P[k],P[k+1],P[k+2]).applyMatrix4(M);w[k]=v.x;w[k+1]=v.y;w[k+2]=v.z}l.G={v:l.ver,g:mkGrid({p:w,i:l.m.i})};return l.G.g}
+function planeHit(l,ray){const o=l.obj;o.updateMatrixWorld(true);const n=new THREE.Vector3(0,0,1).applyQuaternion(o.quaternion).normalize(),pl=new THREE.Plane().setFromNormalAndCoplanarPoint(n,o.position),p=ray.intersectPlane(pl,new THREE.Vector3());
+ if(!p)return null;const q=o.worldToLocal(p.clone());if(Math.abs(q.x)>.5||Math.abs(q.y)>.5)return null;return{p,n}}
+function throughProj(p,n){const g=grd(),D=diagLen(src.p),s=cam.position.clone().sub(p).dot(n)>=0?1:-1,r=g.ray(new THREE.Ray(p.clone().addScaledVector(n,s*D),n.clone().multiplyScalar(-s)));return r?r.p:null}
+let _rb=null,_rbs=null;
+function refBox(){if(_rbs!==src||!_rb){_rbs=src;if(src){const b=new THREE.Box3().setFromArray(src.p);_rb={c:b.getCenter(new THREE.Vector3()),sz:b.getSize(new THREE.Vector3()),d:diagLen(src.p)}}else _rb={c:new THREE.Vector3(),sz:new THREE.Vector3(2,2,2),d:3.46}}return _rb}
+function persist(ul){if(ul)ulDirty=1;clearTimeout(psT);psT=setTimeout(async()=>{try{const d=await idb(),s=d.transaction('s','readwrite').objectStore('s');s.put({rt:{p:rt.p,f:rt.f,le:rt.le},lk,hid,tgtId},'rt');if(ulDirty){s.put(UL.map(ser),'ul');ulDirty=0}}catch(e){}},700)}
+const ser=l=>({id:l.id,k:l.k,name:l.name,vis:l.vis,locked:l.locked,op:l.op,s:l.s,ry:l.ry,ox:l.ox,oy:l.oy,oz:l.oz,base:l.base,rd:l.rd,fs:l.fs,ori:l.ori,flip:l.flip,top:l.top,m:l.m,url:l.url,aspect:l.aspect});
+function mkObj(l){
+ if(l.k==='mesh'){const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.BufferAttribute(l.m.p,3));g.setIndex(new THREE.BufferAttribute(l.m.i,1));g.computeVertexNormals();l.diag=diagLen(l.m.p);
+  l.mat=new THREE.MeshStandardMaterial({color:0x7aa6d6,roughness:.7,metalness:0,transparent:true,opacity:l.op,side:THREE.DoubleSide,polygonOffset:true,polygonOffsetFactor:2,polygonOffsetUnits:2,clippingPlanes:[plane]});l.obj=new THREE.Mesh(g,l.mat);l.obj.renderOrder=-1}
+ else{const tx=new THREE.TextureLoader().load(l.url);l.mat=new THREE.MeshBasicMaterial({map:tx,transparent:true,opacity:l.op,side:THREE.DoubleSide,depthWrite:false,depthTest:!l.top,clippingPlanes:[plane]});l.obj=new THREE.Mesh(new THREE.PlaneGeometry(1,1),l.mat);l.obj.renderOrder=l.top?8:-1}
+ l.obj.rotation.order='YXZ';ulG.add(l.obj)}
+function place(l){const o=l.obj,f=l.fs*l.s/100;
+ if(l.k==='mesh')o.scale.setScalar(f);else{o.scale.set(f*l.aspect*(l.flip?-1:1),f,1);o.rotation.x=l.ori==='top'?-Math.PI/2:0}
+ o.rotation.y=l.ry*Math.PI/180+(l.k==='img'&&l.ori==='side'?Math.PI/2:0);
+ o.position.set(l.base[0]+l.ox/100*l.rd/2,l.base[1]+l.oy/100*l.rd/2,l.base[2]+l.oz/100*l.rd/2);
+ o.visible=l.vis;l.mat.opacity=l.op;o.updateMatrixWorld(true);l.ver=(l.ver||0)+1}
+function fitL(l){const R_=refBox();l.s=100;l.ry=0;l.ox=l.oy=l.oz=0;l.base=[R_.c.x,R_.c.y,R_.c.z];l.rd=R_.d;
+ if(l.k==='mesh')l.fs=R_.d/(l.diag||1);
+ else{l.fs=Math.max(1e-4,l.ori==='top'?R_.sz.z:R_.sz.y);const ex=l.ori==='front'?R_.sz.z:l.ori==='side'?R_.sz.x:R_.sz.y,n=l.ori==='front'?'oz':l.ori==='side'?'ox':'oy';l[n]=-(ex/2+.02*R_.d)/(R_.d/2)*100}
+ place(l)}
+let uid=0;
+function addLayer(l){l.id='u'+(++uid);l.vis=true;l.locked=false;l.s=100;l.ry=0;l.ox=l.oy=l.oz=0;mkObj(l);fitL(l);UL.push(l);selL=l.id;lyRender();persist(1);
+ log('underlay added: '+l.name+' — press ◎ on its row to trace/snap onto it','var(--ac)')}
+function flatten(obj){const parts=[];obj.updateMatrixWorld(true);obj.traverse(o=>{if(o.isMesh&&o.geometry){let g=o.geometry.clone().applyMatrix4(o.matrixWorld);if(g.index)g=g.toNonIndexed();parts.push(g.getAttribute('position').array)}});
+ if(!parts.length)throw new Error('no meshes found');const a=new Float32Array(parts.reduce((s,x)=>s+x.length,0));let o=0;for(const x of parts){a.set(x,o);o+=x.length}return a}
+function readModel(f){return new Promise(async(res,rej)=>{try{const x=f.name.split('.').pop().toLowerCase();
+ if(x==='glb'||x==='gltf')new THREE.GLTFLoader().parse(await f.arrayBuffer(),'',g=>res(g.scene),rej);
+ else if(x==='obj')res(new THREE.OBJLoader().parse(await f.text()));
+ else if(x==='stl'||x==='ply'){const g=(x==='stl'?new THREE.STLLoader():new THREE.PLYLoader()).parse(await f.arrayBuffer());res(new THREE.Mesh(g))}
+ else rej(new Error('unsupported format'))}catch(e){rej(e)}})}
+$('#uam').onclick=()=>$('#ufm').click();$('#uai').onclick=()=>$('#ufi').click();
+$('#ufm').onchange=async e=>{const f=e.target.files[0];e.target.value='';if(!f)return;try{log('importing underlay '+f.name+'…');const a=flatten(await readModel(f)),w=weld(a,Math.max(diagLen(a)*1e-6,1e-12)),b=new THREE.Box3().setFromArray(w.p),c=b.getCenter(new THREE.Vector3()),p=new Float32Array(w.p.length);
+ for(let k=0;k<p.length;k+=3){p[k]=w.p[k]-c.x;p[k+1]=w.p[k+1]-c.y;p[k+2]=w.p[k+2]-c.z}if(w.i.length/3>3e5)log('large underlay ('+w.i.length/3+' tris): snapping may be slow','var(--wr)');
+ addLayer({k:'mesh',name:f.name,op:.5,m:{p,i:w.i}})}catch(er){log('underlay import failed: '+er.message,'var(--er)')}};
+$('#ufi').onchange=e=>{const f=e.target.files[0];e.target.value='';if(!f)return;const fr=new FileReader();fr.onerror=()=>log('image read failed','var(--er)');fr.onload=()=>{const im=new Image();im.onerror=()=>log('image failed to load: '+f.name,'var(--er)');im.onload=()=>addLayer({k:'img',name:f.name,op:.6,url:fr.result,aspect:im.naturalWidth/im.naturalHeight,ori:'front',flip:false,top:false});im.src=fr.result};fr.readAsDataURL(f)};
+function lyRender(){const row=(id,tag,name,v,l,t)=>'<div class="lr'+(selL===id?' a':'')+(l?' lk':'')+'" data-id="'+id+'"><button data-ly="v" title="Show / hide" class="'+(v?'on':'')+'">'+(v?'◉':'○')+'</button><button data-ly="l" title="Lock / unlock (locked layers cannot be edited)" class="'+(l?'on':'')+'">'+(l?'🔒':'🔓')+'</button><span class="n" data-ly="s" title="'+lyEsc(name)+'">'+tag+' '+lyEsc(name)+'</span>'+(t===undefined?'<span></span>':'<button data-ly="t" title="Snap / trace target" class="'+(t?'on':'')+'">'+(t?'◎':'○')+'</button>')+'</div>';
+ $('#ly').innerHTML=row('rt','✎','Retopo sketch',!hid.rt,lk.rt)+row('src','◆','Surface (source)',!hid.src,lk.src,tgtId==='src')+UL.map(l=>row(l.id,l.k==='mesh'?'▣':'▨',l.name,l.vis,l.locked,tgtId===l.id)).join('');upRender()}
+function upRender(){const l=UL.find(x=>x.id===selL),p=$('#up');p.hidden=!l;$('#uhint').textContent=l?'':selL==='rt'?'Retopo sketch: the vertices, edges and faces you draw. Lock it to make Vertex, Draw, Face, Select, Loop, Bridge, Delete and Clear read-only.':'Source surface: the mesh being remeshed. Lock it to block heal, decimate, remesh, retopo commit, apply, undo and import.';
+ if(!l)return;$('#upn').textContent=(l.k==='mesh'?'Surface underlay: ':'Sketch image: ')+l.name+(l.locked?' (locked)':'');
+ const S=(i,v)=>{$('#'+i).value=v};S('uo',Math.round(l.op*100));S('us',l.s);S('ur',l.ry);S('ux',l.ox);S('uy',l.oy);S('uz',l.oz);upVals(l);
+ $('#uim').hidden=l.k!=='img';if(l.k==='img'){$('#uor').value=l.ori;$('#ufl').checked=l.flip;$('#utp').checked=l.top}
+ ['us','ur','ux','uy','uz','uor','ufl','ufit','udel'].forEach(i=>$('#'+i).disabled=l.locked)}
+function upVals(l){$('#uov').textContent=Math.round(l.op*100)+'%';$('#usv').textContent=l.s+'%';$('#urv').textContent=l.ry+'°'}
+const selU=()=>UL.find(x=>x.id===selL);
+const ubind=(id,locked,fn)=>{const el=$('#'+id);el[el.type==='range'?'oninput':'onchange']=()=>{const l=selU();if(!l||(locked&&l.locked))return;fn(l,el);upVals(l);persist(1)}};
+ubind('uo',false,(l,e)=>{l.op=e.value/100;place(l)});ubind('us',true,(l,e)=>{l.s=+e.value;place(l)});ubind('ur',true,(l,e)=>{l.ry=+e.value;place(l)});
+ubind('ux',true,(l,e)=>{l.ox=+e.value;place(l)});ubind('uy',true,(l,e)=>{l.oy=+e.value;place(l)});ubind('uz',true,(l,e)=>{l.oz=+e.value;place(l)});
+ubind('uor',true,(l,e)=>{l.ori=e.value;fitL(l);upRender()});ubind('ufl',true,(l,e)=>{l.flip=e.checked;place(l)});
+ubind('utp',false,(l,e)=>{l.top=e.checked;l.mat.depthTest=!l.top;l.obj.renderOrder=l.top?8:-1});
+$('#ufit').onclick=()=>{const l=selU();if(!l)return;if(l.locked)return log(l.name+' is locked','var(--wr)');fitL(l);upRender();persist(1);log('fitted '+l.name+' to the source bounds')};
+$('#udel').onclick=()=>{const l=selU();if(!l)return;if(l.locked)return log(l.name+' is locked: unlock it to remove','var(--wr)');ulG.remove(l.obj);l.obj.geometry.dispose();l.mat.map&&l.mat.map.dispose();l.mat.dispose();UL.splice(UL.indexOf(l),1);if(tgtId===l.id)tgtId='src';selL='rt';lyRender();rtDraw();persist(1)};
+$('#ly').addEventListener('click',e=>{const b=e.target.closest('[data-ly]'),r=e.target.closest('.lr');if(!b||!r)return;const id=r.dataset.id,a=b.dataset.ly,l=UL.find(x=>x.id===id);
+ if(a==='s')selL=id;
+ else if(a==='v'){if(l){l.vis=!l.vis;l.obj.visible=l.vis;persist(1)}else{hid[id]=hid[id]?0:1;rtF.visible=rtL.visible=rtP.visible=!hid.rt;persist()}}
+ else if(a==='l'){if(l){l.locked=!l.locked;persist(1)}else{lk[id]=lk[id]?0:1;refresh()}const on=l?l.locked:lk[id];log((l?l.name:id==='rt'?'Retopo sketch':'Source surface')+(on?' locked':' unlocked'))}
+ else if(a==='t'){tgtId=l&&tgtId!==id?id:'src';if(l&&tgtId===id&&!l.vis){l.vis=true;l.obj.visible=true}rtDraw();persist(1);log('snap / trace target: '+tgtName())}
+ lyRender()});
+async function restoreLayers(){try{const d=await idb(),s=d.transaction('s').objectStore('s'),P=k=>new Promise(res=>{const q=s.get(k);q.onsuccess=()=>res(q.result);q.onerror=()=>res(null)}),pu=P('ul'),pr=P('rt'),ul=await pu,r=await pr;
+ UL.forEach(l=>ulG.remove(l.obj));UL.length=0;(ul||[]).forEach(o=>{const l=Object.assign({},o);mkObj(l);place(l);UL.push(l);uid=Math.max(uid,+l.id.slice(1)||0)});
+ if(r){rt.p=r.rt.p;rt.f=r.rt.f;rt.le=r.rt.le;Object.assign(lk,r.lk);Object.assign(hid,r.hid);tgtId=r.tgtId||'src';if(tgtId!=='src'&&!UL.some(l=>l.id===tgtId))tgtId='src';rtF.visible=rtL.visible=rtP.visible=!hid.rt}
+ sel.clear();pf=[];stack.length=0;lyRender();refresh();if(UL.length||(r&&r.rt.f.length))log('recovered '+UL.length+' underlay(s) and the retopo sketch','var(--ac)')}catch(e){log('layer recovery failed','var(--er)')}}
+lyRender();
 // ---------- workflow theme ----------
-(function(){const app=$('#app'),ST=[['import','1 Import','Load a mesh or the sample, check the validation panel.'],['heal','2 Heal','Weld, fill holes, fix winding, then preview and Apply.'],['remesh','3 Remesh','Decimate, isotropic/voxel remesh or auto quad retopo; Apply the preview.'],['retopo','4 Retopo','Draw, build faces, loop/bridge, then Commit → mesh.'],['bake','5 Bake','Bake source detail into a tangent-space normal map.'],['export','6 Export','Export GLB (with UVs/skeleton) or OBJ.']],
+(function(){const app=$('#app'),ST=[['import','1 Import','Load a mesh or the sample, check the validation panel.'],['heal','2 Heal','Weld, fill holes, fix winding, then preview and Apply.'],['remesh','3 Remesh','Decimate, isotropic/voxel remesh or auto quad retopo; Apply the preview.'],['retopo','4 Retopo','Add underlays, draw, build faces, loop/bridge, then Commit → mesh.'],['bake','5 Bake','Bake source detail into a tangent-space normal map.'],['export','6 Export','Export GLB (with UVs/skeleton) or OBJ.']],
  MAP={'Import':'import','Display':'all','Assets / hierarchy':'all','Notes':'all','Healing':'heal','Winding':'heal','Decimation (quadric)':'remesh','Smooth / relax':'remesh','Quad reconstruction':'remesh','Remesh':'remesh','Skeleton-aware':'remesh','Manual retopology':'retopo','Normal-map bake':'bake','Export':'export'};let stage='import',th='graphite';
  const G=[];document.querySelectorAll('aside').forEach(a=>{let g=null;[...a.children].forEach(c=>{if(c.tagName==='H4'){g=document.createElement('div');g.className='g';g.dataset.st=MAP[c.textContent.trim()]||'all';a.insertBefore(g,c)}if(g)g.appendChild(c);if(c.tagName==='H4'&&g&&!G.includes(g))G.push(g)})});
  $('#stp').innerHTML=ST.map(x=>'<button data-stage="'+x[0]+'">'+x[1]+'</button>').join('')+'<button data-stage="next" title="Next stage">Next ›</button><span class="hint"></span>';
